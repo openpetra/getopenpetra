@@ -342,7 +342,7 @@ install_openpetra()
 		if [[ "$OS" == "Fedora" ]]; then
 			dnf -y install git nant mono-devel
 		elif [[ "$OS" == "CentOS" ]]; then
-			yum -y install epel-release yum-utils git
+			yum -y install epel-release yum-utils git sudo
 			git config --global push.default simple
 			# install Copr repository for Mono >= 5.10
 			su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
