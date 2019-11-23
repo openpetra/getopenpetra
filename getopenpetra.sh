@@ -47,6 +47,8 @@ SRC_PATH=$OPENPETRA_HOME/openpetra
 OPENPETRA_SERVERNAME=localhost
 OPENPETRA_URL=http://localhost
 OPENPETRA_SERVER_BIN=/usr/bin/openpetra
+GITHUB_USER=openpetra
+OPENPETRA_BRANCH=dev # TODO: switch to test by default???
 
 nginx_conf()
 {
@@ -232,6 +234,14 @@ install_openpetra()
 	trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
 	install_type="$1"
 
+	if [ ! -z "$2" ]; then
+		GITHUB_USER="$2"
+	fi
+
+	if [ ! -z "$3" ]; then
+		OPENPETRA_BRANCH="$3"
+	fi
+
 	# Valid install type is required
 	if [[ "$install_type" != "devenv" && "$install_type" != "test" && "$install_type" != "prod" ]]; then
 		echo "You must specify the install type:"
@@ -304,8 +314,6 @@ install_openpetra()
 		OPENPETRA_HOME=/home/$OPENPETRA_USER
 		SRC_PATH=$OPENPETRA_HOME/openpetra
 		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		OPENPETRA_BRANCH=dev
-		#TODO OPENPETRA_BRANCH=test
 
 		if [[ "$OS" == "Fedora" ]]; then
 			dnf -y install git nant mono-devel
@@ -351,7 +359,7 @@ install_openpetra()
 
 		if [ ! -d $SRC_PATH ]
 		then
-			git clone --depth 10 https://github.com/openpetra/openpetra.git -b $OPENPETRA_BRANCH $SRC_PATH
+			git clone --depth 50 https://github.com/$GITHUB_USER/openpetra.git -b $OPENPETRA_BRANCH $SRC_PATH
 		fi
 		cd $SRC_PATH
 
