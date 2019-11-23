@@ -190,10 +190,6 @@ FINISH
 		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
-		# TODO: Logfile wrong in /home/op_dev/etc/PetraServerConsole.config, and other missing replacements in config file
-		# TODO: db password. dbsm.connectiontimeout etc; ApplicationDirectory; Server.Url; PathTemp; PathData; SqlFiles.Path; 
-		# TODO: SMTP Settings???
-
 	cat $SRC_PATH/setup/petra0300/linuxserver/PetraServerAdminConsole.config \
 		| sed -e "s/USERNAME/$userName/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
@@ -212,17 +208,23 @@ FINISH
 FINISH
 
 	# set symbolic links
-	ln -s $SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
+	cd $OPENPETRA_HOME
+	MY_SRC_PATH=$SRC_PATH
+	if [ "$SRC_PATH" = "$OPENPETRA_HOME/openpetra" ]; then
+		MY_SRC_PATH=openpetra
+	fi
+	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
-	ln -s $SRC_PATH/delivery $OPENPETRA_HOME/server
-	ln -s $SRC_PATH/XmlReports $OPENPETRA_HOME/reports
-	ln -s $SRC_PATH/csharp/ICT/Petra/Server/sql $OPENPETRA_HOME/sql
-	ln -s $SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
-	ln -s $SRC_PATH/inc/template/emails $OPENPETRA_HOME/emails
-	ln -s $SRC_PATH/js-client $OPENPETRA_HOME/client
-	ln -s $SRC_PATH/delivery $SRC_PATH/delivery/api
-	ln -s $SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
-	ln -s $SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH/delivery $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH/XmlReports $OPENPETRA_HOME/reports
+	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/sql $OPENPETRA_HOME/sql
+	ln -s $MY_SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
+	ln -s $MY_SRC_PATH/inc/template/emails $OPENPETRA_HOME/emails
+	ln -s $MY_SRC_PATH/js-client $OPENPETRA_HOME/client
+	ln -s $MY_SRC_PATH/delivery $SRC_PATH/delivery/api
+	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
+	cd -
 }
 
 install_openpetra()
@@ -389,7 +391,8 @@ install_openpetra()
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
 		# display information to the developer
-		echo "Go and check your instance at $OPENPETRA_URL; login with user DEMO and password demo"
+		echo "Go and check your instance at $OPENPETRA_URL"
+		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
 		echo "See also the API at $OPENPETRA_URL/api/"
 		echo "You find phpMyAdmin running at $OPENPETRA_URL/phpmyadmin"
 		echo "Start developing in $SRC_PATH as user $OPENPETRA_USER, and use the following commands:"
