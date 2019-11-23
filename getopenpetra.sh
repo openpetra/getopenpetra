@@ -333,6 +333,7 @@ install_openpetra()
 			# for the js client
 			curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
 			yum -y install nodejs
+			npm set progress=false
 			npm install -g browserify
 			npm install -g uglify-es
 			#npm install cypress # somehow this will be downloaded again later, when calling npm install in the js-client path
@@ -394,7 +395,9 @@ install_openpetra()
 		fi
 
 		cd js-client
-		npm install || exit -1
+		npm set progress=false
+		# set CI=1 to avoid too much output from installing cypress. see https://github.com/cypress-io/cypress/issues/1243#issuecomment-365560861
+		( CI=1 npm install --quiet ) || exit -1
 		# TODO replace with nant install.js
 		npm run build || exit -1
 		cd ..
