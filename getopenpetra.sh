@@ -357,10 +357,6 @@ install_openpetra()
 			# for the js client
 			curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
 			yum -y install nodejs
-			npm set progress=false
-			npm install -g browserify
-			npm install -g uglify-es
-			npm install -g cypress
 			# for mono development
 			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
 			# update the certificates for Mono
