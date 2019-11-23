@@ -404,11 +404,6 @@ install_openpetra()
 		nant generateTools recreateDatabase resetDatabase || exit -1
 		nant generateSolution || exit -1
 
-		# download and restore demo database
-		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
-		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
-		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
-
 		# TODO drop non-linux dlls from bin
 		rm -f delivery/bin/Mono.Data.Sqlite.dll
 		rm -f delivery/bin/Mono.Security.dll
@@ -430,10 +425,15 @@ install_openpetra()
 		npm run build || exit -1
 		cd ..
 
+		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
+
+		# download and restore demo database
+		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
+		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
+		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
+
 		# Still needed? nant install
 		systemctl restart openpetra
-
-		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
 		# display information to the developer
 		echo "Go and check your instance at $OPENPETRA_URL"
