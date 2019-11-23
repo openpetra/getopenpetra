@@ -340,6 +340,8 @@ install_openpetra()
 			# for mono development
 			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
 			yum -y install mariadb-server nginx lsb libsodium
+			# update the certificates for Mono
+			curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 			# phpmyadmin
 			if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
 				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
