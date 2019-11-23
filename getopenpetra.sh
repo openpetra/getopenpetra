@@ -36,6 +36,7 @@
 
 OPENPETRA_DBNAME=openpetra
 OPENPETRA_DBUSER=openpetra
+OPENPETRA_DBMS=mysql
 OPENPETRA_DBPWD=TO_BE_SET
 OPENPETRA_RDBMSType=mysql
 OPENPETRA_DBHOST=localhost
@@ -133,7 +134,8 @@ openpetra_conf()
 	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
 
 	# install OpenPetra service file
-	cat > /usr/lib/systemd/system/openpetra.service <<FINISH
+	if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+		cat > /usr/lib/systemd/system/openpetra.service <<FINISH
 [Unit]
 Description=OpenPetra Server
 After=mariadb.service
@@ -148,6 +150,21 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 FINISH
+	else
+		cat > /usr/lib/systemd/system/openpetra.service <<FINISH
+[Unit]
+Description=OpenPetra Server
+
+[Service]
+User=$OPENPETRA_USER
+ExecStart=$OPENPETRA_SERVER_BIN start
+ExecStop=$OPENPETRA_SERVER_BIN stop
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+FINISH
+	fi
 
 	systemctl enable openpetra
 	systemctl start openpetra
@@ -166,7 +183,7 @@ FINISH
 	cat > $SRC_PATH/OpenPetra.build.config <<FINISH
 <?xml version="1.0"?>
 <project name="OpenPetra-userconfig">
-    <property name="DBMS.Type" value="mysql"/>
+    <property name="DBMS.Type" value="$OPENPETRA_DBMS"/>
     <property name="DBMS.DBName" value="$OPENPETRA_DBNAME"/>
     <property name="DBMS.UserName" value="$OPENPETRA_DBUSER"/>
     <property name="DBMS.Password" value="$OPENPETRA_DBPWD"/>
@@ -240,6 +257,10 @@ install_openpetra()
 
 	if [ ! -z "$3" ]; then
 		OPENPETRA_BRANCH="$3"
+	fi
+
+	if [ ! -z "$4" ]; then
+		OPENPETRA_DBMS="$4"
 	fi
 
 	# Valid install type is required
@@ -323,7 +344,7 @@ install_openpetra()
 			# install Copr repository for Mono >= 5.10
 			su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 			# for printing reports to pdf
-			if [[ "`rpm -qa | grep wkhtmltox`" = "" ]]; then
+			if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
 				yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
 			fi
 			# for cypress tests
@@ -339,23 +360,26 @@ install_openpetra()
 			#npm install cypress # somehow this will be downloaded again later, when calling npm install in the js-client path
 			# for mono development
 			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
-			yum -y install mariadb-server nginx lsb libsodium
 			# update the certificates for Mono
 			curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-			# phpmyadmin
-			if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
-				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+			yum -y install nginx lsb libsodium
+			if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+				yum -y install mariadb-server
+				# phpmyadmin
+				if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
+					yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+				fi
+				yum-config-manager --enable remi-php71
+				yum-config-manager --enable remi
+				yum -y install phpMyAdmin php-fpm
+				sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
+				sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
+				sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
+				sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
+				chown nginx:nginx /var/lib/php/session
+				systemctl enable php-fpm
+				systemctl start php-fpm
 			fi
-			yum-config-manager --enable remi-php71
-			yum-config-manager --enable remi
-			yum -y install phpMyAdmin php-fpm
-			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
-			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
-			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
-			sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
-			chown nginx:nginx /var/lib/php/session
-			systemctl enable php-fpm
-			systemctl start php-fpm
 		elif [[ "$OS_FAMILY" == "Debian" ]]; then
 			apt-get -y install git nant
 		fi
@@ -369,7 +393,9 @@ install_openpetra()
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/openpetra.conf
 		# configure mariadb
-		mariadb_conf
+		if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+			mariadb_conf
+		fi
 		# configure openpetra (mono process)
 		openpetra_conf
 
