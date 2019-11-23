@@ -219,7 +219,7 @@ FINISH
 	ln -s $MY_SRC_PATH/XmlReports $OPENPETRA_HOME/reports
 	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/sql $OPENPETRA_HOME/sql
 	ln -s $MY_SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
-	ln -s $MY_SRC_PATH/inc/template/emails $OPENPETRA_HOME/emails
+	ln -s $MY_SRC_PATH/inc/template/email $OPENPETRA_HOME/emails
 	ln -s $MY_SRC_PATH/js-client $OPENPETRA_HOME/client
 	ln -s $MY_SRC_PATH/delivery $SRC_PATH/delivery/api
 	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
@@ -297,7 +297,6 @@ install_openpetra()
 	# Setup the development environment #
 	#####################################
 	if [[ "$install_type" == "devenv" ]]; then
-		SRC_PATH=/root/openpetra
 		OPENPETRA_DBNAME=op_dev
 		OPENPETRA_DBUSER=op_dev
 		OPENPETRA_USER=op_dev
@@ -327,7 +326,7 @@ install_openpetra()
 			yum -y install nodejs
 			npm install -g browserify
 			npm install -g uglify-es
-			npm install cypress
+			#npm install cypress # somehow this will be downloaded again later, when calling npm install in the js-client path
 			# for mono development
 			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
 			yum -y install mariadb-server nginx lsb libsodium
@@ -364,9 +363,13 @@ install_openpetra()
 
 		# TODO: run as user op_dev???
 
-		nant generateTools recreateDatabase resetDatabase
-		# TODO restore demo database
-		nant generateSolution
+		nant generateTools recreateDatabase resetDatabase || exit -1
+		nant generateSolution || exit -1
+
+		# download and restore demo database
+		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
+		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
+		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
 		# TODO drop non-linux dlls from bin
 		rm -f delivery/bin/Mono.Data.Sqlite.dll
@@ -374,15 +377,17 @@ install_openpetra()
 		rm -f delivery/bin/sqlite3.dll
 		rm -f delivery/bin/libsodium.dll
 		rm -f delivery/bin/libsodium-64.dll
-		if [ -f /usr/lib64/libsodium.so.23 ]; then
-			# CentOS 7
-			ln -s /usr/lib64/libsodium.so.23 delivery/bin/libsodium.so
+		if [ ! -f delivery/bin/libsodium.so ]; then
+			if [ -f /usr/lib64/libsodium.so.23 ]; then
+				# CentOS 7
+				ln -s /usr/lib64/libsodium.so.23 delivery/bin/libsodium.so
+			fi
 		fi
 
 		cd js-client
-		npm install
+		npm install || exit -1
 		# TODO replace with nant install.js
-		npm run build
+		npm run build || exit -1
 		cd ..
 
 		# Still needed? nant install
