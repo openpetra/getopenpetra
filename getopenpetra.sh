@@ -36,7 +36,6 @@
 
 OPENPETRA_DBNAME=openpetra
 OPENPETRA_DBUSER=openpetra
-OPENPETRA_DBMS=mysql
 OPENPETRA_DBPWD=TO_BE_SET
 OPENPETRA_RDBMSType=mysql
 OPENPETRA_DBHOST=localhost
@@ -134,7 +133,7 @@ openpetra_conf()
 	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
 
 	# install OpenPetra service file
-	if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		cat > /usr/lib/systemd/system/openpetra.service <<FINISH
 [Unit]
 Description=OpenPetra Server
@@ -184,7 +183,7 @@ FINISH
 <?xml version="1.0"?>
 <project name="OpenPetra-userconfig">
     <property name="DBMS.Type" value="$OPENPETRA_DBMS"/>
-    <property name="DBMS.DBName" value="$OPENPETRA_DBNAME"/>
+    <property name="DBMS.DBName" value="$OPENPETRA_RDBMSType"/>
     <property name="DBMS.UserName" value="$OPENPETRA_DBUSER"/>
     <property name="DBMS.Password" value="$OPENPETRA_DBPWD"/>
     <property name="Server.DebugLevel" value="0"/>
@@ -260,7 +259,11 @@ install_openpetra()
 	fi
 
 	if [ ! -z "$4" ]; then
-		OPENPETRA_DBMS="$4"
+		OPENPETRA_RDBMSType="$4"
+	fi
+
+	if [[ $OPENPETRA_RDBMSType == "sqlite" ]]; then
+		OPENPETRA_DBPWD=
 	fi
 
 	# Valid install type is required
@@ -348,7 +351,7 @@ install_openpetra()
 				yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
 			fi
 			# for cypress tests
-			yum -y install libXScrnSaver GConf2 Xvfb
+			yum -y install libXScrnSaver GConf2 Xvfb gtk3
 			# for printing bar codes
 			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 			# for the js client
@@ -357,13 +360,13 @@ install_openpetra()
 			npm set progress=false
 			npm install -g browserify
 			npm install -g uglify-es
-			#npm install cypress # somehow this will be downloaded again later, when calling npm install in the js-client path
+			npm install -g cypress
 			# for mono development
 			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
 			# update the certificates for Mono
 			curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 			yum -y install nginx lsb libsodium
-			if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 				yum -y install mariadb-server
 				# phpmyadmin
 				if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
@@ -379,6 +382,8 @@ install_openpetra()
 				chown nginx:nginx /var/lib/php/session
 				systemctl enable php-fpm
 				systemctl start php-fpm
+			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+				yum -y install sqlite
 			fi
 		elif [[ "$OS_FAMILY" == "Debian" ]]; then
 			apt-get -y install git nant
@@ -393,7 +398,7 @@ install_openpetra()
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/openpetra.conf
 		# configure mariadb
-		if [[ "$OPENPETRA_DBMS" == "mysql" ]]; then
+		if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 			mariadb_conf
 		fi
 		# configure openpetra (mono process)
@@ -404,26 +409,8 @@ install_openpetra()
 		nant generateTools recreateDatabase resetDatabase || exit -1
 		nant generateSolution || exit -1
 
-		# TODO drop non-linux dlls from bin
-		rm -f delivery/bin/Mono.Data.Sqlite.dll
-		rm -f delivery/bin/Mono.Security.dll
-		rm -f delivery/bin/sqlite3.dll
-		rm -f delivery/bin/libsodium.dll
-		rm -f delivery/bin/libsodium-64.dll
-		if [ ! -f delivery/bin/libsodium.so ]; then
-			if [ -f /usr/lib64/libsodium.so.23 ]; then
-				# CentOS 7
-				ln -s /usr/lib64/libsodium.so.23 delivery/bin/libsodium.so
-			fi
-		fi
-
-		cd js-client
-		npm set progress=false
-		# set CI=1 to avoid too much output from installing cypress. see https://github.com/cypress-io/cypress/issues/1243#issuecomment-365560861
-		( CI=1 npm install --quiet ) || exit -1
-		# TODO replace with nant install.js
-		npm run build || exit -1
-		cd ..
+		nant install.net || exit -1
+		nant install.js || exit -1
 
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
@@ -431,9 +418,6 @@ install_openpetra()
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
-
-		# Still needed? nant install
-		systemctl restart openpetra
 
 		# display information to the developer
 		echo "Go and check your instance at $OPENPETRA_URL"
