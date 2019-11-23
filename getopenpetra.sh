@@ -215,8 +215,10 @@ FINISH
 	ln -s $SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
 	ln -s $SRC_PATH/delivery $OPENPETRA_HOME/server
-	ln -s $SRC_PATH/reports $OPENPETRA_HOME/reports
-	# TODO: sql, formletters, custom, emails
+	ln -s $SRC_PATH/XmlReports $OPENPETRA_HOME/reports
+	ln -s $SRC_PATH/csharp/ICT/Petra/Server/sql $OPENPETRA_HOME/sql
+	ln -s $SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
+	ln -s $SRC_PATH/inc/template/emails $OPENPETRA_HOME/emails
 	ln -s $SRC_PATH/js-client $OPENPETRA_HOME/client
 	ln -s $SRC_PATH/delivery $SRC_PATH/delivery/api
 	ln -s $SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
