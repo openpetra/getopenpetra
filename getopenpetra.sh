@@ -133,62 +133,25 @@ openpetra_conf()
 	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
 
 	# install OpenPetra service file
-	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		cat > /usr/lib/systemd/system/openpetra.service <<FINISH
-[Unit]
-Description=OpenPetra Server
-After=mariadb.service
-Wants=mariadb.service
-
-[Service]
-User=$OPENPETRA_USER
-ExecStart=$OPENPETRA_SERVER_BIN start
-ExecStop=$OPENPETRA_SERVER_BIN stop
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-FINISH
-	else
-		cat > /usr/lib/systemd/system/openpetra.service <<FINISH
-[Unit]
-Description=OpenPetra Server
-
-[Service]
-User=$OPENPETRA_USER
-ExecStart=$OPENPETRA_SERVER_BIN start
-ExecStop=$OPENPETRA_SERVER_BIN stop
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-FINISH
-	fi
+	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service \
+		| sed -e "s/OPENPETRA_USER/$OPENPETRA_USER/g" \
+		| sed -e "s/OPENPETRA_SERVER_BIN/$OPENPETRA_SERVER_BIN/g" \
+		> /usr/lib/systemd/system/openpetra.service
 
 	systemctl enable openpetra
 	systemctl start openpetra
 
 	# copy web.config for easier debugging
 	mkdir -p $SRC_PATH/delivery
-	cat > $SRC_PATH/delivery/web.config <<FINISH
-<configuration>
-    <system.web>
-        <customErrors mode="Off"/>
-    </system.web>
-</configuration>
-FINISH
+	cp $SRC_PATH/setup/petra0300/linuxserver/web.config $SRC_PATH/delivery/web.config
 
 	# create OpenPetra.build.config
-	cat > $SRC_PATH/OpenPetra.build.config <<FINISH
-<?xml version="1.0"?>
-<project name="OpenPetra-userconfig">
-    <property name="DBMS.Type" value="$OPENPETRA_DBMS"/>
-    <property name="DBMS.DBName" value="$OPENPETRA_RDBMSType"/>
-    <property name="DBMS.UserName" value="$OPENPETRA_DBUSER"/>
-    <property name="DBMS.Password" value="$OPENPETRA_DBPWD"/>
-    <property name="Server.DebugLevel" value="0"/>
-</project>
-FINISH
+	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/OpenPetra.build.config \
+		| sed -e "s/OPENPETRA_RDBMSType/$OPENPETRA_RDBMSType/g" \
+		| sed -e "s/OPENPETRA_DBNAME/$OPENPETRA_DBNAME/g" \
+		| sed -e "s/OPENPETRA_DBUSER/$OPENPETRA_DBUSER/g" \
+		| sed -e "s/OPENPETRA_DBPWD/$OPENPETRA_DBPWD/g" \
+		> $SRC_PATH/OpenPetra.build.config
 
 	mkdir -p $OPENPETRA_HOME/etc
 	mkdir -p $OPENPETRA_HOME/log
@@ -212,18 +175,8 @@ FINISH
 		| sed -e "s/USERNAME/$userName/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
 		> $OPENPETRA_HOME/etc/PetraServerAdminConsole.config
-	cat >> $OPENPETRA_HOME/etc/common.config <<FINISH
-<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-  <system.web>
-    <sessionState
-      mode="InProc"
-      timeout="30" /> <!-- timeout in minutes -->
-    <customErrors mode="Off"/>
-    <compilation tempDirectory="/var/tmp" debug="true" strict="false" explicit="true"/>
-  </system.web>
-</configuration>
-FINISH
+
+	cp $SRC_PATH/setup/petra0300/linuxserver/common.config $OPENPETRA_HOME/etc/common.config
 
 	# set symbolic links
 	cd $OPENPETRA_HOME
