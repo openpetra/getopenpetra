@@ -361,6 +361,7 @@ install_openpetra()
 
 		nant install.net || exit -1
 		nant install.js || exit -1
+		su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress --quiet"
 
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
