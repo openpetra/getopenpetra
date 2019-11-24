@@ -181,8 +181,10 @@ openpetra_conf()
 	# set symbolic links
 	cd $OPENPETRA_HOME
 	MY_SRC_PATH=$SRC_PATH
+	MY_SRC_PATH_SERVER=$SRC_PATH
 	if [ "$SRC_PATH" = "$OPENPETRA_HOME/openpetra" ]; then
 		MY_SRC_PATH=openpetra
+		MY_SRC_PATH_SERVER=../../openpetra
 	fi
 	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
@@ -192,9 +194,9 @@ openpetra_conf()
 	ln -s $MY_SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
 	ln -s $MY_SRC_PATH/inc/template/email $OPENPETRA_HOME/emails
 	ln -s $MY_SRC_PATH/js-client $OPENPETRA_HOME/client
-	ln -s $MY_SRC_PATH/delivery $SRC_PATH/delivery/api
-	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
-	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH_SERVER/delivery $SRC_PATH/delivery/api
+	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
 	cd -
 }
 
