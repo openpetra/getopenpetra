@@ -184,7 +184,6 @@ openpetra_conf()
 	MY_SRC_PATH_SERVER=$SRC_PATH
 	if [ "$SRC_PATH" = "$OPENPETRA_HOME/openpetra" ]; then
 		MY_SRC_PATH=openpetra
-		MY_SRC_PATH_SERVER=../../openpetra
 	fi
 	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
