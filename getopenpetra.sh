@@ -114,20 +114,6 @@ generatepwd()
 	dd bs=1024 count=1 if=/dev/urandom status=none | tr -dc 'a-zA-Z0-9#?_' | fold -w 32 | head -n 1
 }
 
-mariadb_conf()
-{
-	OPENPETRA_DBPWD=`generatepwd`
-	systemctl start mariadb
-	systemctl enable mariadb
-	mkdir -p $OPENPETRA_HOME/tmp
-	echo "DROP DATABASE IF EXISTS \`$OPENPETRA_DBNAME\`;" > $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-	echo "CREATE DATABASE IF NOT EXISTS \`$OPENPETRA_DBNAME\`;" >> $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-	echo "USE \`$OPENPETRA_DBNAME\`;" >> $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-	echo "GRANT ALL ON \`$OPENPETRA_DBNAME\`.* TO \`$OPENPETRA_DBUSER\`@localhost IDENTIFIED BY '$OPENPETRA_DBPWD'" >> $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-	mysql -u root < $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-	rm -f $OPENPETRA_HOME/tmp/createdb-MySQL.sql
-}
-
 openpetra_conf()
 {
 	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
@@ -185,7 +171,7 @@ openpetra_conf()
 	if [ "$SRC_PATH" = "$OPENPETRA_HOME/openpetra" ]; then
 		MY_SRC_PATH=openpetra
 	fi
-	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/mysql/centos/openpetra-server.sh $OPENPETRA_SERVER_BIN
+	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
 	ln -s $MY_SRC_PATH/delivery $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH/XmlReports $OPENPETRA_HOME/reports
@@ -203,6 +189,8 @@ install_openpetra()
 {
 	trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
 	install_type="$1"
+
+	OPENPETRA_DBPWD=`generatepwd`
 
 	if [ ! -z "$2" ]; then
 		GITHUB_USER="$2"
@@ -332,6 +320,8 @@ install_openpetra()
 				chown nginx:nginx /var/lib/php/session
 				systemctl enable php-fpm
 				systemctl start php-fpm
+			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+				yum -y install postgresql-server
 			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 				yum -y install sqlite
 			fi
@@ -347,10 +337,6 @@ install_openpetra()
 
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/openpetra.conf
-		# configure mariadb
-		if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-			mariadb_conf
-		fi
 		# configure openpetra (mono process)
 		openpetra_conf
 
@@ -365,6 +351,9 @@ install_openpetra()
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
 		su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress --quiet"
+
+		# configure database
+		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
 
 		# download and restore demo database
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
