@@ -135,7 +135,7 @@ openpetra_conf()
 	# install OpenPetra service file
 	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service \
 		| sed -e "s/OPENPETRA_USER/$OPENPETRA_USER/g" \
-		| sed -e "s/OPENPETRA_SERVER_BIN/$OPENPETRA_SERVER_BIN/g" \
+		| sed -e "s#OPENPETRA_SERVER_BIN#$OPENPETRA_SERVER_BIN#g" \
 		> /usr/lib/systemd/system/openpetra.service
 
 	systemctl enable openpetra
