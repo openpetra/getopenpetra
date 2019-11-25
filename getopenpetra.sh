@@ -28,8 +28,8 @@
 #
 #	$ curl https://getopenpetra.com | bash -s prod
 #
-# This should work on CentOS 7.
-# We plan to support soon: Fedora 31 and Debian 10 (Buster) and Ubuntu 18.04 (Bionic Beaver).
+# This should work on CentOS 7 and Fedora 31.
+# We plan to support soon: Debian 10 (Buster) and Ubuntu 18.04 (Bionic Beaver).
 # Please open an issue if you notice any bugs.
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
@@ -245,7 +245,7 @@ install_openpetra()
 		if [[ "$OS" == "Ubuntu" ]]; then OS="Ubuntu"; OS_FAMILY="Debian"; fi
 
 		if [[ "$OS" != "CentOS" 
-			#&& "$OS" != "Fedora"
+			&& "$OS" != "Fedora"
 			#&& "$OS" != "Debian"
 			#&& "$OS" != "Ubuntu"
 			]]; then
@@ -284,7 +284,34 @@ install_openpetra()
 		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
 
 		if [[ "$OS" == "Fedora" ]]; then
-			dnf -y install git nant mono-devel
+			dnf -y install git sudo
+			# for printing reports to pdf
+			dnf -y install wkhtmltopdf
+			# for cypress tests
+			dnf -y install libXScrnSaver GConf2 Xvfb gtk3
+			# for printing bar codes
+			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
+			# for the js client
+			dnf -y install nodejs
+			# for mono development
+			dnf -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+			dnf -y install nginx lsb libsodium
+			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+				dnf -y install mariadb-server
+				# phpmyadmin
+				dnf -y install phpMyAdmin php-fpm
+				sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
+				sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
+				sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
+				sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
+				chown nginx:nginx /var/lib/php/session
+				systemctl enable php-fpm
+				systemctl start php-fpm
+			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+				dnf -y install postgresql-server
+			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+				dnf -y install sqlite
+			fi
 		elif [[ "$OS" == "CentOS" ]]; then
 			yum -y install epel-release yum-utils git sudo
 			git config --global push.default simple
