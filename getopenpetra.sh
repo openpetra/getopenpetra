@@ -204,8 +204,10 @@ install_openpetra()
 		OPENPETRA_RDBMSType="$4"
 	fi
 
-	if [[ $OPENPETRA_RDBMSType == "sqlite" ]]; then
+	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 		OPENPETRA_DBPWD=
+	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+		OPENPETRA_DBPORT=5432
 	fi
 
 	# Valid install type is required
