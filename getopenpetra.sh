@@ -28,7 +28,7 @@
 #
 #	$ curl https://getopenpetra.com | bash -s prod
 #
-# This should work on CentOS 7 and Fedora 31.
+# This should work on CentOS 7 and Fedora 31, and Ubuntu 19.10 (Eoan Ermine).
 # We plan to support soon: Debian 10 (Buster) and Ubuntu 18.04 (Bionic Beaver).
 # Please open an issue if you notice any bugs.
 
@@ -247,7 +247,7 @@ install_openpetra()
 		if [[ "$OS" != "CentOS" 
 			&& "$OS" != "Fedora"
 			#&& "$OS" != "Debian"
-			#&& "$OS" != "Ubuntu"
+			&& "$OS" != "Ubuntu"
 			]]; then
 			echo "Aborted, Your distro is not supported: " $OS
 			return 6
@@ -261,7 +261,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != "10" && "$VER" != "18.04" ]]; then
+			if [[ "$VER" != "10" && "$VER" != "18.04"  && "$VER" != "19.10" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
@@ -354,8 +354,44 @@ install_openpetra()
 			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 				yum -y install sqlite
 			fi
-		elif [[ "$OS_FAMILY" == "Debian" ]]; then
-			apt-get -y install git nant
+		elif [[ "$OS" == "Ubuntu" ]]; then
+			apt-get -y install git sudo
+			# for printing reports to pdf
+			apt-get -y install wkhtmltopdf
+			# for cypress tests
+			apt-get -y install gconf2 xvfb # libgtk3.0-cil libXScrnSaver
+			# for printing bar codes
+			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
+			# for the js client
+			apt-get -y install nodejs npm
+			# for mono development
+			if [[ "$VER" == "18.04" ]]; then
+				apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+				apt-get update
+			fi
+			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
+			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
+				rm -f /usr/lib/mono/4.5-api/System.dll
+			fi
+			apt-get -y install nant mono-devel mono-xsp4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+			apt-get -y install nginx libsodium23 lsb
+			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+				apt-get -y install mariadb-server
+				# phpmyadmin
+				#apt-get -y install phpmyadmin php-fpm
+				#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
+				#chown nginx:nginx /var/lib/php/session
+				#systemctl enable php-fpm
+				#systemctl start php-fpm
+			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+				apt-get -y install postgresql-server
+			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+				apt-get -y install sqlite
+			fi
 		fi
 
 		if [ ! -d $SRC_PATH ]
