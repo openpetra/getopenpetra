@@ -370,11 +370,11 @@ install_openpetra()
 				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
 				apt-get update
 			fi
+			apt-get -y install nant mono-devel mono-xsp4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
 			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
 			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 				rm -f /usr/lib/mono/4.5-api/System.dll
 			fi
-			apt-get -y install nant mono-devel mono-xsp4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
 			apt-get -y install nginx libsodium23 lsb
 			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 				apt-get -y install mariadb-server
