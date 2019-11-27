@@ -28,8 +28,9 @@
 #
 #	$ curl https://getopenpetra.com | bash -s prod
 #
-# This should work on CentOS 7 and Fedora 31, and Ubuntu 19.10 (Eoan Ermine).
-# We plan to support soon: Debian 10 (Buster) and Ubuntu 18.04 (Bionic Beaver).
+# This should work on CentOS 7 and Fedora 31,
+# and Ubuntu 19.10 (Eoan Ermine), Ubuntu 18.04 (Bionic Beaver)
+# and Debian 10 (Buster).
 # Please open an issue if you notice any bugs.
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
@@ -249,7 +250,7 @@ install_openpetra()
 
 		if [[ "$OS" != "CentOS" 
 			&& "$OS" != "Fedora"
-			#&& "$OS" != "Debian"
+			&& "$OS" != "Debian"
 			&& "$OS" != "Ubuntu"
 			]]; then
 			echo "Aborted, Your distro is not supported: " $OS
@@ -356,6 +357,45 @@ install_openpetra()
 				yum -y install postgresql-server
 			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 				yum -y install sqlite
+			fi
+		elif [[ "$OS" == "Debian" ]]; then
+			apt-get -y install git sudo
+			# for printing reports to pdf
+			apt-get -y install wkhtmltopdf
+			# for cypress tests
+			apt-get -y install gconf2 xvfb # libgtk3.0-cil libXScrnSaver
+			# for printing bar codes
+			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
+			# for the js client
+			apt-get -y install nodejs npm
+			# for mono development
+			if [[ "$VER" == "10" ]]; then
+				# for nant
+				echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster/ /' >> /etc/apt/sources.list
+				apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+				apt-get update
+			fi
+			apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
+			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
+				rm -f /usr/lib/mono/4.5-api/System.dll
+			fi
+			apt-get -y install nginx libsodium23 lsb
+			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+				apt-get -y install mariadb-server
+				# phpmyadmin
+				#apt-get -y install phpmyadmin php-fpm
+				#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
+				#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
+				#chown nginx:nginx /var/lib/php/session
+				#systemctl enable php-fpm
+				#systemctl start php-fpm
+			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+				apt-get -y install postgresql-server
+			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+				apt-get -y install sqlite
 			fi
 		elif [[ "$OS" == "Ubuntu" ]]; then
 			apt-get -y install git sudo
