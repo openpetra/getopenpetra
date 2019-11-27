@@ -55,6 +55,9 @@ nginx_conf()
 	openpetra_conf_path="$1"
 	# let the default nginx server run on another port
 	sed -i "s/listen\(.*\)80/listen\181/g" /etc/nginx/nginx.conf
+	if [ -f /etc/nginx/sites-enabled/default ]; then
+		sed -i "s/listen\(.*\)80/listen\181/g" /etc/nginx/sites-enabled/default
+	fi
 	# modify fastcgi_params
 	if [[ "`grep SCRIPT_FILENAME /etc/nginx/fastcgi_params`" == "" ]]
 	then
@@ -370,7 +373,7 @@ install_openpetra()
 				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
 				apt-get update
 			fi
-			apt-get -y install nant mono-devel mono-xsp4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+			apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
 			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
 			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 				rm -f /usr/lib/mono/4.5-api/System.dll
