@@ -67,47 +67,15 @@ fastcgi_param  PATH_INFO          "";
 fastcgi_param  SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
 FINISH
 	fi
-	cat > $openpetra_conf_path <<FINISH
-server {
-    listen 80;
-    server_name $OPENPETRA_SERVERNAME;
 
-    root ${OPENPETRA_HOME}/client;
+	cat $SRC_PATH/setup/petra0300/linuxserver/nginx.conf \
+		| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
+		| sed -e "s/OPENPETRA_HOME/$OPENPETRA_HOME/g" \
+		| sed -e "s/OPENPETRA_URL/$OPENPETRA_URL/g" \
+		| sed -e "s/OPENPETRA_/$OPENPETRA_/g" \
+		| sed -e "s/OPENPETRA_/$OPENPETRA_/g" \
+		> $openpetra_conf_path
 
-    location / {
-         rewrite ^/Selfservice.*$ /;
-         rewrite ^/Settings.*$ /;
-         rewrite ^/Partner.*$ /;
-         rewrite ^/Finance.*$ /;
-         rewrite ^/CrossLedger.*$ /;
-         rewrite ^/System.*$ /;
-         rewrite ^/.git/.*$ / redirect;
-         rewrite ^/etc/.*$ / redirect;
-         rewrite ^/phpmyadmin.*$ /phpMyAdmin redirect;
-    }
-
-    location /api {
-         index index.html index.htm default.aspx Default.aspx;
-         fastcgi_index Default.aspx;
-         fastcgi_pass 127.0.0.1:6700;
-         include /etc/nginx/fastcgi_params;
-         sub_filter_types text/html text/css text/xml;
-         sub_filter 'http://$OPENPETRA_SERVERNAME/api' '$OPENPETRA_URL/api';
-    }
-
-    location /phpMyAdmin {
-         root /usr/share/;
-         index index.php index.html index.htm;
-         location ~ ^/phpMyAdmin/(.+\.php)$ {
-                   root /usr/share/;
-                   fastcgi_pass 127.0.0.1:8080;
-                   fastcgi_index index.php;
-                   include /etc/nginx/fastcgi_params;
-                   fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-         }
-    }
-}
-FINISH
 	systemctl start nginx
 	systemctl enable nginx
 
