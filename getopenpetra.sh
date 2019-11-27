@@ -123,10 +123,15 @@ openpetra_conf()
 	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
 
 	# install OpenPetra service file
+	systemdpath="/usr/lib/systemd/system"
+	if [ ! -d $systemdpath ]; then
+		# Ubuntu Bionic
+		systemdpath="/lib/systemd/system"
+	fi
 	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service \
 		| sed -e "s/OPENPETRA_USER/$OPENPETRA_USER/g" \
 		| sed -e "s#OPENPETRA_SERVER_BIN#$OPENPETRA_SERVER_BIN#g" \
-		> /usr/lib/systemd/system/openpetra.service
+		> $systemdpath/openpetra.service
 
 	systemctl enable openpetra
 	systemctl start openpetra
