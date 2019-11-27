@@ -376,7 +376,7 @@ install_openpetra()
 			# for mono development
 			if [[ "$VER" == "10" ]]; then
 				# for nant
-				echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster/ /' >> /etc/apt/sources.list
+				echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
 				apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 				apt-get update
 			fi
@@ -385,7 +385,7 @@ install_openpetra()
 			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 				rm -f /usr/lib/mono/4.5-api/System.dll
 			fi
-			apt-get -y install nginx libsodium23 lsb
+			apt-get -y install nginx libsodium23
 			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 				apt-get -y install mariadb-server
 				# phpmyadmin
