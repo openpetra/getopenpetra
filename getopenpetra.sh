@@ -426,21 +426,19 @@ install_openpetra()
 		# configure openpetra (mono process)
 		openpetra_conf
 
-		# TODO: run as user op_dev???
-
-		# configure database
-		nant generateTools createSQLStatements || exit -1
-		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
-		nant recreateDatabase resetDatabase || exit -1
-
-		nant generateSolution || exit -1
-
-		nant install.net || exit -1
-		nant install.js || exit -1
-
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
-		su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress --quiet"
+		# configure database
+		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
+		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
+		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
+
+		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
+		su $OPENPETRA_USER -c "nant install.net" || exit -1
+		su $OPENPETRA_USER -c "nant install.js" || exit -1
+
+		# for the cypress test environment
+		su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress --quiet" || exit -1
 
 		# download and restore demo database
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
