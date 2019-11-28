@@ -194,7 +194,13 @@ install_openpetra()
 		return 9
 	fi
 
-	sudo_cmd="sudo"
+	# We don't run with SELinux for the moment
+	if [ -f /usr/sbin/sestatus ]; then
+		if [[ "`sestatus | grep -E 'disabled|permissive'`" == "" ]]; then
+			echo "SELinux is active, please set it to permissive"
+			exit 1
+		fi
+	fi
 
 	#########################
 	# Which OS and version? #
