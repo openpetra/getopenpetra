@@ -70,10 +70,8 @@ FINISH
 
 	cat $SRC_PATH/setup/petra0300/linuxserver/nginx.conf \
 		| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
-		| sed -e "s/OPENPETRA_HOME/$OPENPETRA_HOME/g" \
-		| sed -e "s/OPENPETRA_URL/$OPENPETRA_URL/g" \
-		| sed -e "s/OPENPETRA_/$OPENPETRA_/g" \
-		| sed -e "s/OPENPETRA_/$OPENPETRA_/g" \
+		| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
+		| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
 		> $openpetra_conf_path
 
 	systemctl start nginx
