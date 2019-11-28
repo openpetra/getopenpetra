@@ -371,7 +371,14 @@ install_openpetra()
 		elif [[ "$OS" == "Ubuntu" ]]; then
 			apt-get -y install git sudo
 			# for printing reports to pdf
-			apt-get -y install wkhtmltopdf
+			if [[ "$VER" == "18.04" ]]; then
+				# we need version 0.12.5, not 0.12.4 which is part of bionic.
+				curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb > wkhtmltox_0.12.5-1.bionic_amd64.deb
+				apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb
+				rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
+			else
+				apt-get -y install wkhtmltopdf
+			fi
 			# for cypress tests
 			apt-get -y install gconf2 xvfb # libgtk3.0-cil libXScrnSaver
 			# for printing bar codes
