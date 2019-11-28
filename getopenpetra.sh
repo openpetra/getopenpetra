@@ -334,7 +334,7 @@ install_openpetra()
 			# for printing reports to pdf
 			apt-get -y install wkhtmltopdf
 			# for cypress tests
-			apt-get -y install gconf2 xvfb # libgtk3.0-cil libXScrnSaver
+			apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver
 			# for printing bar codes
 			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 			# for the js client
