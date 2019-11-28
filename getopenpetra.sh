@@ -440,7 +440,7 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
-		su $OPENPETRA_USER -c "nant install.net" || exit -1
+		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
 		su $OPENPETRA_USER -c "nant install.js" || exit -1
 
 		# for the cypress test environment
