@@ -451,6 +451,8 @@ install_openpetra()
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
+		systemctl restart openpetra
+
 		# display information to the developer
 		echo "Go and check your instance at $OPENPETRA_URL"
 		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
