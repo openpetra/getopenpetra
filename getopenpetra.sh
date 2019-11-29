@@ -295,7 +295,6 @@ install_openpetra()
 			fi
 		elif [[ "$OS" == "CentOS" ]]; then
 			yum -y install epel-release yum-utils git sudo
-			git config --global push.default simple
 			# install Copr repository for Mono >= 5.10
 			su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 			# for printing reports to pdf
@@ -442,6 +441,9 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
 		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
 		su $OPENPETRA_USER -c "nant install.js" || exit -1
+
+		# for fixing issues on CentOS, pushing to upstream branches
+		su $OPENPETRA_USER -c "git config --global push.default simple"
 
 		# for the cypress test environment
 		su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress --quiet" || exit -1
