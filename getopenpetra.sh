@@ -443,6 +443,7 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant install.js" || exit -1
 
 		# for fixing issues on CentOS, pushing to upstream branches
+		git config --global push.default simple
 		su $OPENPETRA_USER -c "git config --global push.default simple"
 
 		# for the cypress test environment
@@ -454,6 +455,7 @@ install_openpetra()
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
 		systemctl restart openpetra
+		systemctl restart nginx
 
 		# display information to the developer
 		echo "Go and check your instance at $OPENPETRA_URL"
