@@ -38,8 +38,8 @@
 OPENPETRA_DBNAME=openpetra
 OPENPETRA_DBUSER=openpetra
 OPENPETRA_DBPWD=TO_BE_SET
-OPENPETRA_RDBMSType=mysql
-OPENPETRA_DBHOST=localhost
+export OPENPETRA_RDBMSType=mysql
+export OPENPETRA_DBHOST=localhost
 OPENPETRA_DBPORT=3306
 OPENPETRA_PORT=7000
 OPENPETRA_USER=openpetra
@@ -68,7 +68,7 @@ fastcgi_param  SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
 FINISH
 	fi
 
-	cat $SRC_PATH/setup/petra0300/linuxserver/nginx.conf \
+	cat $NGINX_TEMPLATE_FILE \
 		| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
 		| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
 		| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
@@ -88,20 +88,35 @@ openpetra_conf()
 {
 	useradd --shell /bin/bash --home $OPENPETRA_HOME --create-home $OPENPETRA_USER
 
+	if [[ "$install_type" == "test" ]]; then
+		for d in openpetra-201*; do
+			mv $d/* $OPENPETRA_HOME
+			rm -Rf $d
+			chmod a+r -R $OPENPETRA_HOME
+			find $OPENPETRA_HOME -type d -print0 | xargs -0 chmod a+x
+		done
+	fi
+
 	# install OpenPetra service file
 	systemdpath="/usr/lib/systemd/system"
 	if [ ! -d $systemdpath ]; then
 		# Ubuntu Bionic
 		systemdpath="/lib/systemd/system"
 	fi
-	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service \
+	cat $OPENPETRA_SERVICE_FILE \
 		| sed -e "s/OPENPETRA_USER/$OPENPETRA_USER/g" \
 		| sed -e "s#OPENPETRA_SERVER_BIN#$OPENPETRA_SERVER_BIN#g" \
 		> $systemdpath/openpetra.service
 
+	mkdir -p $OPENPETRA_HOME/etc
+	cp $TEMPLATES_PATH/common.config $OPENPETRA_HOME/etc/common.config
+
 	systemctl enable openpetra
 	systemctl start openpetra
+}
 
+openpetra_conf_devenv()
+{
 	# copy web.config for easier debugging
 	mkdir -p $SRC_PATH/delivery
 	cp $SRC_PATH/setup/petra0300/linuxserver/web.config $SRC_PATH/delivery/web.config
@@ -117,7 +132,7 @@ openpetra_conf()
 	mkdir -p $OPENPETRA_HOME/etc
 	mkdir -p $OPENPETRA_HOME/log
 	# copy config files (server, serveradmin.config) to etc, with adjustments
-	cat $SRC_PATH/setup/petra0300/linuxserver/PetraServerConsole.config \
+	cat $TEMPLATES_PATH/PetraServerConsole.config \
 		| sed -e "s/OPENPETRA_PORT/$OPENPETRA_PORT/" \
 		| sed -e "s/OPENPETRA_RDBMSType/$OPENPETRA_RDBMSType/" \
 		| sed -e "s/OPENPETRA_DBHOST/$OPENPETRA_DBHOST/" \
@@ -132,12 +147,10 @@ openpetra_conf()
 		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
-	cat $SRC_PATH/setup/petra0300/linuxserver/PetraServerAdminConsole.config \
+	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
 		| sed -e "s/USERNAME/$userName/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
 		> $OPENPETRA_HOME/etc/PetraServerAdminConsole.config
-
-	cp $SRC_PATH/setup/petra0300/linuxserver/common.config $OPENPETRA_HOME/etc/common.config
 
 	# set symbolic links
 	cd $OPENPETRA_HOME
@@ -158,6 +171,208 @@ openpetra_conf()
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
 	cd -
+}
+
+install_fedora()
+{
+	dnf -y install git sudo
+	# for printing reports to pdf
+	dnf -y install wkhtmltopdf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for cypress tests
+		dnf -y install libXScrnSaver GConf2 Xvfb gtk3
+	fi
+	# for printing bar codes
+	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for building the js client
+		dnf -y install nodejs
+		# for mono development
+		dnf -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+	else
+		# for mono runtime
+		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+	fi
+	dnf -y install nginx lsb libsodium
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+		dnf -y install mariadb-server
+		if [[ "$install_type" == "devenv" ]]; then
+			# phpmyadmin
+			dnf -y install phpMyAdmin php-fpm
+			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
+			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
+			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
+			sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
+			chown nginx:nginx /var/lib/php/session
+			systemctl enable php-fpm
+			systemctl start php-fpm
+		fi
+	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+		dnf -y install postgresql-server
+	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+		dnf -y install sqlite
+	fi
+}
+
+install_centos()
+{
+	yum -y install epel-release yum-utils git sudo
+	# install Copr repository for Mono >= 5.10
+	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
+	# for printing reports to pdf
+	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
+		yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
+	fi
+	if [[ "$install_type" == "devenv" ]]; then
+		# for cypress tests
+		yum -y install libXScrnSaver GConf2 Xvfb gtk3
+	fi
+	# for printing bar codes
+	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for building the js client
+		curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
+		yum -y install nodejs
+		# for mono development
+		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+	else
+		# for mono runtime
+		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+	fi
+	# update the certificates for Mono
+	curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
+	yum -y install nginx lsb libsodium
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+		yum -y install mariadb-server
+		if [[ "$install_type" == "devenv" ]]; then
+			# phpmyadmin
+			if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
+				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+			fi
+			yum-config-manager --enable remi-php71
+			yum-config-manager --enable remi
+			yum -y install phpMyAdmin php-fpm
+			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
+			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
+			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
+			sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
+			chown nginx:nginx /var/lib/php/session
+			systemctl enable php-fpm
+			systemctl start php-fpm
+		fi
+	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+		yum -y install postgresql-server
+	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+		yum -y install sqlite
+	fi
+}
+
+install_debian()
+{
+	apt-get -y install git sudo
+	# for printing reports to pdf
+	apt-get -y install wkhtmltopdf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for cypress tests
+		apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver
+	fi
+	# for printing bar codes
+	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for building the js client
+		apt-get -y install nodejs npm
+		# for mono development
+		if [[ "$VER" == "10" ]]; then
+			# for nant
+			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
+			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+			apt-get update
+		fi
+		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+	else
+		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+	fi
+	# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
+	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
+		rm -f /usr/lib/mono/4.5-api/System.dll
+	fi
+	apt-get -y install nginx libsodium23
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+		apt-get -y install mariadb-server
+		if [[ "$install_type" == "devenv" ]]; then
+			echo "TODO: phpmyadmin"
+			# phpmyadmin
+			#apt-get -y install phpmyadmin php-fpm
+			#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
+			#chown nginx:nginx /var/lib/php/session
+			#systemctl enable php-fpm
+			#systemctl start php-fpm
+		fi
+	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+		apt-get -y install postgresql-server
+	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+		apt-get -y install sqlite
+	fi
+}
+
+install_ubuntu()
+{
+	apt-get -y install git sudo
+	# for printing reports to pdf
+	if [[ "$VER" == "18.04" ]]; then
+		# we need version 0.12.5, not 0.12.4 which is part of bionic.
+		curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb > wkhtmltox_0.12.5-1.bionic_amd64.deb
+		apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb
+		rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
+	else
+		apt-get -y install wkhtmltopdf
+	fi
+	if [[ "$install_type" == "devenv" ]]; then
+		# for cypress tests
+		apt-get -y install gconf2 xvfb libgdk-pixbuf2.0-0 libgtk-3-0 libxss1 libasound2
+	fi
+	# for printing bar codes
+	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
+	if [[ "$install_type" == "devenv" ]]; then
+		# for building the js client
+		apt-get -y install nodejs npm
+		# for mono development
+		if [[ "$VER" == "18.04" ]]; then
+			apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+			echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+			apt-get update
+		fi
+		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+	else
+		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+	fi
+	# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
+	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
+		rm -f /usr/lib/mono/4.5-api/System.dll
+	fi
+	apt-get -y install nginx libsodium23 lsb
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+		apt-get -y install mariadb-server
+		if [[ "$install_type" == "devenv" ]]; then
+			echo "TODO: phpmyadmin"
+			# phpmyadmin
+			#apt-get -y install phpmyadmin php-fpm
+			#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
+			#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
+			#chown nginx:nginx /var/lib/php/session
+			#systemctl enable php-fpm
+			#systemctl start php-fpm
+		fi
+	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+		apt-get -y install postgresql-server
+	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+		apt-get -y install sqlite
+	fi
 }
 
 install_openpetra()
@@ -192,6 +407,11 @@ install_openpetra()
 		echo "  test: install an environment to test OpenPetra"
 		echo "  prod: install a production server with OpenPetra"
 		return 9
+	fi
+
+	# just for documentation
+	if [[ "$install_type" == "reset" ]]; then
+		systemctl stop openpetra && userdel openpetra && userdel op_test && rm -Rf /home/*
 	fi
 
 	# We don't run with SELinux for the moment
@@ -252,6 +472,16 @@ install_openpetra()
 		return 6
 	fi
 
+	if [[ "$OS" == "Fedora" ]]; then
+		install_fedora
+	elif [[ "$OS" == "CentOSTODO" ]]; then
+		install_centos
+	elif [[ "$OS" == "Debian" ]]; then
+		install_debian
+	elif [[ "$OS" == "Ubuntu" ]]; then
+		install_ubuntu
+	fi
+
 	#####################################
 	# Setup the development environment #
 	#####################################
@@ -263,162 +493,9 @@ install_openpetra()
 		OPENPETRA_HOME=/home/$OPENPETRA_USER
 		SRC_PATH=$OPENPETRA_HOME/openpetra
 		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-
-		if [[ "$OS" == "Fedora" ]]; then
-			dnf -y install git sudo
-			# for printing reports to pdf
-			dnf -y install wkhtmltopdf
-			# for cypress tests
-			dnf -y install libXScrnSaver GConf2 Xvfb gtk3
-			# for printing bar codes
-			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
-			# for the js client
-			dnf -y install nodejs
-			# for mono development
-			dnf -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
-			dnf -y install nginx lsb libsodium
-			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-				dnf -y install mariadb-server
-				# phpmyadmin
-				dnf -y install phpMyAdmin php-fpm
-				sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
-				sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
-				sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
-				sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
-				chown nginx:nginx /var/lib/php/session
-				systemctl enable php-fpm
-				systemctl start php-fpm
-			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-				dnf -y install postgresql-server
-			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-				dnf -y install sqlite
-			fi
-		elif [[ "$OS" == "CentOS" ]]; then
-			yum -y install epel-release yum-utils git sudo
-			# install Copr repository for Mono >= 5.10
-			su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
-			# for printing reports to pdf
-			if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
-				yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
-			fi
-			# for cypress tests
-			yum -y install libXScrnSaver GConf2 Xvfb gtk3
-			# for printing bar codes
-			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
-			# for the js client
-			curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
-			yum -y install nodejs
-			# for mono development
-			yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
-			# update the certificates for Mono
-			curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-			yum -y install nginx lsb libsodium
-			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-				yum -y install mariadb-server
-				# phpmyadmin
-				if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
-					yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-				fi
-				yum-config-manager --enable remi-php71
-				yum-config-manager --enable remi
-				yum -y install phpMyAdmin php-fpm
-				sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
-				sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
-				sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
-				sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
-				chown nginx:nginx /var/lib/php/session
-				systemctl enable php-fpm
-				systemctl start php-fpm
-			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-				yum -y install postgresql-server
-			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-				yum -y install sqlite
-			fi
-		elif [[ "$OS" == "Debian" ]]; then
-			apt-get -y install git sudo
-			# for printing reports to pdf
-			apt-get -y install wkhtmltopdf
-			# for cypress tests
-			apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver
-			# for printing bar codes
-			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
-			# for the js client
-			apt-get -y install nodejs npm
-			# for mono development
-			if [[ "$VER" == "10" ]]; then
-				# for nant
-				echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
-				apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-				apt-get update
-			fi
-			apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
-			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
-			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
-				rm -f /usr/lib/mono/4.5-api/System.dll
-			fi
-			apt-get -y install nginx libsodium23
-			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-				apt-get -y install mariadb-server
-				# phpmyadmin
-				#apt-get -y install phpmyadmin php-fpm
-				#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
-				#chown nginx:nginx /var/lib/php/session
-				#systemctl enable php-fpm
-				#systemctl start php-fpm
-			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-				apt-get -y install postgresql-server
-			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-				apt-get -y install sqlite
-			fi
-		elif [[ "$OS" == "Ubuntu" ]]; then
-			apt-get -y install git sudo
-			# for printing reports to pdf
-			if [[ "$VER" == "18.04" ]]; then
-				# we need version 0.12.5, not 0.12.4 which is part of bionic.
-				curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb > wkhtmltox_0.12.5-1.bionic_amd64.deb
-				apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb
-				rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
-			else
-				apt-get -y install wkhtmltopdf
-			fi
-			# for cypress tests
-			apt-get -y install gconf2 xvfb libgdk-pixbuf2.0-0 libgtk-3-0 libxss1 libasound2
-			# for printing bar codes
-			curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
-			# for the js client
-			apt-get -y install nodejs npm
-			# for mono development
-			if [[ "$VER" == "18.04" ]]; then
-				apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-				apt-get update
-			fi
-			apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
-			# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
-			if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
-				rm -f /usr/lib/mono/4.5-api/System.dll
-			fi
-			apt-get -y install nginx libsodium23 lsb
-			if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-				apt-get -y install mariadb-server
-				# phpmyadmin
-				#apt-get -y install phpmyadmin php-fpm
-				#sed -i "s#user = apache#user = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#group = apache#group = nginx#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php/7.2/fpm/pool.d/www.conf
-				#sed -i "s#;chdir = /var/www#chdir = /usr/share/phpmyadmin#" /etc/php/7.2/fpm/pool.d/www.conf
-				#chown nginx:nginx /var/lib/php/session
-				#systemctl enable php-fpm
-				#systemctl start php-fpm
-			elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-				apt-get -y install postgresql-server
-			elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-				apt-get -y install sqlite
-			fi
-		fi
+		OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
+		NGINX_TEMPLATE_FILE=$SRC_PATH/setup/petra0300/linuxserver/nginx.conf
+		TEMPLATES_PATH=$SRC_PATH/setup/petra0300/linuxserver
 
 		if [ ! -d $SRC_PATH ]
 		then
@@ -426,10 +503,12 @@ install_openpetra()
 		fi
 		cd $SRC_PATH
 
-		# configure nginx
-		nginx_conf /etc/nginx/conf.d/openpetra.conf
 		# configure openpetra (mono process)
 		openpetra_conf
+		openpetra_conf_devenv
+
+		# configure nginx
+		nginx_conf /etc/nginx/conf.d/openpetra.conf
 
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
@@ -469,6 +548,47 @@ install_openpetra()
 		echo "    nant compileProject -D:name=Ict.Common"
 	fi
 
+	##############################
+	# Setup the test environment #
+	##############################
+	if [[ "$install_type" == "test" ]]; then
+		export OPENPETRA_DBNAME=op_test
+		export OPENPETRA_DBUSER=op_test
+		export OPENPETRA_USER=openpetra
+		export OP_CUSTOMER=op_test
+		OPENPETRA_SERVERNAME=$OPENPETRA_USER.localhost
+		OPENPETRA_HOME=/home/$OPENPETRA_USER
+		SRC_PATH=/home/$OPENPETRA_USER
+		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
+		TEMPLATES_PATH=$SRC_PATH/templates
+		OPENPETRA_SERVICE_FILE=$TEMPLATES_PATH/openpetra.service
+		NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
+
+		# get the binary tarball
+		if [ ! -f openpetra-latest-bin.tar.gz ]; then
+			curl --silent --location https://getopenpetra.com/openpetra-latest-bin.tar.gz > openpetra-latest-bin.tar.gz
+		fi
+
+		rm -Rf openpetra-2*
+		tar xzf openpetra-latest-bin.tar.gz
+
+		# configure openpetra (mono process)
+		openpetra_conf
+
+		# configure nginx
+		nginx_conf /etc/nginx/conf.d/openpetra.conf
+
+		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
+
+		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
+		$OPENPETRA_SERVER_BIN initdb || exit -1
+
+		systemctl restart openpetra
+		systemctl restart nginx
+
+		echo "Go and check your instance at $OPENPETRA_URL"
+		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
+	fi
 }
 
 
