@@ -86,7 +86,7 @@ generatepwd()
 
 openpetra_conf()
 {
-	useradd --home $OPENPETRA_HOME $OPENPETRA_USER
+	useradd --shell /bin/bash --home $OPENPETRA_HOME --create-home $OPENPETRA_USER
 
 	# install OpenPetra service file
 	systemdpath="/usr/lib/systemd/system"
