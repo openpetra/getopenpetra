@@ -474,7 +474,7 @@ install_openpetra()
 
 	if [[ "$OS" == "Fedora" ]]; then
 		install_fedora
-	elif [[ "$OS" == "CentOSTODO" ]]; then
+	elif [[ "$OS" == "CentOS" ]]; then
 		install_centos
 	elif [[ "$OS" == "Debian" ]]; then
 		install_debian
