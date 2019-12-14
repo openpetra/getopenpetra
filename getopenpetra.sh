@@ -175,7 +175,7 @@ openpetra_conf_devenv()
 
 install_fedora()
 {
-	dnf -y install git sudo
+	dnf -y install git sudo unzip
 	# for printing reports to pdf
 	dnf -y install wkhtmltopdf
 	if [[ "$install_type" == "devenv" ]]; then
@@ -216,7 +216,7 @@ install_fedora()
 
 install_centos()
 {
-	yum -y install epel-release yum-utils git sudo
+	yum -y install epel-release yum-utils git sudo unzip
 	# install Copr repository for Mono >= 5.10
 	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 	# for printing reports to pdf
@@ -269,7 +269,7 @@ install_centos()
 
 install_debian()
 {
-	apt-get -y install git sudo
+	apt-get -y install git sudo unzip
 	# for printing reports to pdf
 	apt-get -y install wkhtmltopdf
 	if [[ "$install_type" == "devenv" ]]; then
@@ -320,7 +320,7 @@ install_debian()
 
 install_ubuntu()
 {
-	apt-get -y install git sudo
+	apt-get -y install git sudo unzip
 	# for printing reports to pdf
 	if [[ "$VER" == "18.04" ]]; then
 		# we need version 0.12.5, not 0.12.4 which is part of bionic.
