@@ -94,6 +94,18 @@ openpetra_conf()
 			rm -Rf $d
 			chmod a+r -R $OPENPETRA_HOME
 			find $OPENPETRA_HOME -type d -print0 | xargs -0 chmod a+x
+			rm -f $OPENPETRA_HOME/server/bin/Mono.Security.dll
+			rm -f $OPENPETRA_HOME/server/bin/Mono.Data.Sqlite.dll
+			rm -f $OPENPETRA_HOME/server/bin/sqlite3.dll
+			rm -f $OPENPETRA_HOME/server/bin/libsodium.dll
+			rm -f $OPENPETRA_HOME/server/bin/libsodium-64.dll
+
+			if [ -f /usr/lib64/libsodium.so.18 ]; then
+				ln -s /usr/lib64/libsodium.so.18 $OPENPETRA_HOME/server/bin/libsodium.so
+			elif [ -f /usr/lib64/libsodium.so.23 ]; then
+				ln -s /usr/lib64/libsodium.so.23 $OPENPETRA_HOME/server/bin/libsodium.so
+			elif [ -f /usr/lib/x86_64-linux-gnu/libsodium.so.23 ]; then
+				ln -s /usr/lib/x86_64-linux-gnu/libsodium.so.23 $OPENPETRA_HOME/server/bin/libsodium.so
 		done
 	fi
 
@@ -380,7 +392,7 @@ install_openpetra()
 	trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
 	install_type="$1"
 
-	OPENPETRA_DBPWD=`generatepwd`
+	export OPENPETRA_DBPWD=`generatepwd`
 
 	if [ ! -z "$2" ]; then
 		GITHUB_USER="$2"
@@ -582,12 +594,14 @@ install_openpetra()
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
+		chmod a+ws $OPENPETRA_HOME/log
+		chmod a+w -R $OPENPETRA_HOME/log
 
 		systemctl restart openpetra
 		systemctl restart nginx
 
 		echo "Go and check your instance at $OPENPETRA_URL"
-		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
+		echo "login with user SYSADMIN and password CHANGEME."
 	fi
 }
 
