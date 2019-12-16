@@ -35,21 +35,21 @@
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
 
-OPENPETRA_DBNAME=openpetra
-OPENPETRA_DBUSER=openpetra
-OPENPETRA_DBPWD=TO_BE_SET
+export OPENPETRA_DBNAME=openpetra
+export OPENPETRA_DBUSER=openpetra
+export OPENPETRA_DBPWD=TO_BE_SET
 export OPENPETRA_RDBMSType=mysql
 export OPENPETRA_DBHOST=localhost
-OPENPETRA_DBPORT=3306
-OPENPETRA_PORT=7000
-OPENPETRA_USER=openpetra
-OPENPETRA_HOME=/home/$OPENPETRA_USER
-SRC_PATH=$OPENPETRA_HOME/openpetra
-OPENPETRA_SERVERNAME=localhost
-OPENPETRA_URL=http://localhost
-OPENPETRA_SERVER_BIN=/usr/bin/openpetra
-GITHUB_USER=openpetra
-OPENPETRA_BRANCH=dev # TODO: switch to test by default???
+export OPENPETRA_DBPORT=3306
+export OPENPETRA_PORT=7000
+export OPENPETRA_USER=openpetra
+export OPENPETRA_HOME=/home/$OPENPETRA_USER
+export SRC_PATH=$OPENPETRA_HOME/openpetra
+export OPENPETRA_SERVERNAME=localhost
+export OPENPETRA_URL=http://localhost
+export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
+export GITHUB_USER=openpetra
+export OPENPETRA_BRANCH=dev # TODO: switch to test by default???
 
 nginx_conf()
 {
@@ -499,16 +499,16 @@ install_openpetra()
 	# Setup the development environment #
 	#####################################
 	if [[ "$install_type" == "devenv" ]]; then
-		OPENPETRA_DBNAME=op_dev
-		OPENPETRA_DBUSER=op_dev
-		OPENPETRA_USER=op_dev
-		OPENPETRA_SERVERNAME=$OPENPETRA_USER.localhost
-		OPENPETRA_HOME=/home/$OPENPETRA_USER
-		SRC_PATH=$OPENPETRA_HOME/openpetra
-		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
-		NGINX_TEMPLATE_FILE=$SRC_PATH/setup/petra0300/linuxserver/nginx.conf
-		TEMPLATES_PATH=$SRC_PATH/setup/petra0300/linuxserver
+		export OPENPETRA_DBNAME=op_dev
+		export OPENPETRA_DBUSER=op_dev
+		export OPENPETRA_USER=op_dev
+		export OPENPETRA_SERVERNAME=$OPENPETRA_USER.localhost
+		export OPENPETRA_HOME=/home/$OPENPETRA_USER
+		export SRC_PATH=$OPENPETRA_HOME/openpetra
+		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
+		export OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
+		export NGINX_TEMPLATE_FILE=$SRC_PATH/setup/petra0300/linuxserver/nginx.conf
+		export TEMPLATES_PATH=$SRC_PATH/setup/petra0300/linuxserver
 
 		if [ ! -d $SRC_PATH ]
 		then
@@ -569,13 +569,13 @@ install_openpetra()
 		export OPENPETRA_DBUSER=op_test
 		export OPENPETRA_USER=openpetra
 		export OP_CUSTOMER=op_test
-		OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
-		OPENPETRA_HOME=/home/$OPENPETRA_USER
-		SRC_PATH=/home/$OPENPETRA_USER
-		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		TEMPLATES_PATH=$SRC_PATH/templates
-		OPENPETRA_SERVICE_FILE=$TEMPLATES_PATH/openpetra.service
-		NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
+		export OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
+		export OPENPETRA_HOME=/home/$OPENPETRA_USER
+		export SRC_PATH=/home/$OPENPETRA_USER
+		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
+		export TEMPLATES_PATH=$SRC_PATH/templates
+		export OPENPETRA_SERVICE_FILE=$TEMPLATES_PATH/openpetra.service
+		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
 
 		# get the binary tarball
 		if [ ! -f openpetra-latest-bin.tar.gz ]; then
