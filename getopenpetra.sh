@@ -569,7 +569,7 @@ install_openpetra()
 		export OPENPETRA_DBUSER=op_test
 		export OPENPETRA_USER=openpetra
 		export OP_CUSTOMER=op_test
-		OPENPETRA_SERVERNAME=$OPENPETRA_USER.localhost
+		OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
 		OPENPETRA_HOME=/home/$OPENPETRA_USER
 		SRC_PATH=/home/$OPENPETRA_USER
 		OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
@@ -595,8 +595,8 @@ install_openpetra()
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
-		chmod a+ws $OPENPETRA_HOME/log
-		chmod a+w -R $OPENPETRA_HOME/log
+		chmod a+ws /home/$OP_CUSTOMER/log
+		chmod a+w -R /home/$OP_CUSTOMER/log
 
 		systemctl restart openpetra
 		systemctl restart nginx
