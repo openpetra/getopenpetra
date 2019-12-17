@@ -43,6 +43,7 @@ export OPENPETRA_DBHOST=localhost
 export OPENPETRA_DBPORT=3306
 export OPENPETRA_PORT=7000
 export OPENPETRA_USER=openpetra
+export OP_CUSTOMER=
 export OPENPETRA_HOME=/home/$OPENPETRA_USER
 export SRC_PATH=$OPENPETRA_HOME/openpetra
 export OPENPETRA_SERVERNAME=localhost
@@ -395,17 +396,26 @@ install_openpetra()
 
 	export OPENPETRA_DBPWD=`generatepwd`
 
-	if [ ! -z "$2" ]; then
-		GITHUB_USER="$2"
-	fi
-
-	if [ ! -z "$3" ]; then
-		OPENPETRA_BRANCH="$3"
-	fi
-
-	if [ ! -z "$4" ]; then
-		OPENPETRA_RDBMSType="$4"
-	fi
+	while [ $# -gt 0 ]; do
+		case "$1" in
+			--github_user=*)
+				export GITHUB_USER="${1#*=}"
+				;;
+			--branch=*)
+				export OPENPETRA_BRANCH="${1#*=}"
+				;;
+			--dbms=*)
+				export OPENPETRA_RDBMSType="${1#*=}"
+				;;
+			--url=*)
+				export OPENPETRA_URL="${1#*=}"
+				;;
+			--instance=*)
+				export OP_CUSTOMER="${1#*=}"
+				;;
+		esac
+		shift
+	done
 
 	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 		OPENPETRA_DBPWD=
@@ -423,9 +433,9 @@ install_openpetra()
 	fi
 
 	# just for documentation
-	if [[ "$install_type" == "reset" ]]; then
-		systemctl stop openpetra && userdel openpetra && userdel op_test && rm -Rf /home/*
-	fi
+	#if [[ "$install_type" == "reset" ]]; then
+	#	systemctl stop openpetra && userdel openpetra && userdel op_test && rm -Rf /home/*
+	#fi
 
 	# We don't run with SELinux for the moment
 	if [ -f /usr/sbin/sestatus ]; then
@@ -499,9 +509,12 @@ install_openpetra()
 	# Setup the development environment #
 	#####################################
 	if [[ "$install_type" == "devenv" ]]; then
-		export OPENPETRA_DBNAME=op_dev
-		export OPENPETRA_DBUSER=op_dev
-		export OPENPETRA_USER=op_dev
+		if [ -z $OP_CUSTOMER ]; then
+			export OP_CUSTOMER=op_dev
+		fi
+		export OPENPETRA_USER=$OP_CUSTOMER
+		export OPENPETRA_DBNAME=$OP_CUSTOMER
+		export OPENPETRA_DBUSER=$OP_CUSTOMER
 		export OPENPETRA_SERVERNAME=$OPENPETRA_USER.localhost
 		export OPENPETRA_HOME=/home/$OPENPETRA_USER
 		export SRC_PATH=$OPENPETRA_HOME/openpetra
@@ -565,10 +578,12 @@ install_openpetra()
 	# Setup the test environment #
 	##############################
 	if [[ "$install_type" == "test" ]]; then
-		export OPENPETRA_DBNAME=op_test
-		export OPENPETRA_DBUSER=op_test
+		if [ -z $OP_CUSTOMER ]; then
+			export OP_CUSTOMER=op_test
+		fi
+		export OPENPETRA_DBNAME=$OP_CUSTOMER
+		export OPENPETRA_DBUSER=$OP_CUSTOMER
 		export OPENPETRA_USER=openpetra
-		export OP_CUSTOMER=op_test
 		export OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
 		export OPENPETRA_HOME=/home/$OPENPETRA_USER
 		export SRC_PATH=/home/$OPENPETRA_USER
