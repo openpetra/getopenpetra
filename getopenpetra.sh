@@ -611,8 +611,6 @@ install_openpetra()
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
-		chmod a+ws /home/$OP_CUSTOMER/log
-		chmod a+w -R /home/$OP_CUSTOMER/log
 
 		systemctl restart openpetra
 		systemctl restart nginx
