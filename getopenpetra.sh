@@ -176,6 +176,7 @@ openpetra_conf_devenv()
 	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
 	ln -s $MY_SRC_PATH/delivery $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH/delivery/db $OPENPETRA_HOME/db
 	ln -s $MY_SRC_PATH/XmlReports $OPENPETRA_HOME/reports
 	ln -s $MY_SRC_PATH/csharp/ICT/Petra/Server/sql $OPENPETRA_HOME/sql
 	ln -s $MY_SRC_PATH/demodata/formletters $OPENPETRA_HOME/formletters
