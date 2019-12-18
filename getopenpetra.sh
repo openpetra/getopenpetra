@@ -18,6 +18,20 @@
 #
 #	bash -s [devenv|test|prod]
 #
+# available options:
+#     --git_url=<http git url>
+#            default is: --git_url=https://github.com/openpetra/openpetra.git
+#     --branch=<branchname>
+#            default is: --branch=test
+#     --dbms=<dbms>
+#            default is: --dbms=mysql
+#            other options: postgresql, sqlite
+#     --url=<outside url>
+#            default is: --url=http://localhost
+#            for demo: --url=https://demo.openpetra.org
+#     --instance=<instance>
+#            default is: --instance=op_dev for devenv, --instance=op_test for test
+#
 # If you purchased a commercial license, you must set your account
 # ID and API key in environment variables:
 #
@@ -49,8 +63,8 @@ export SRC_PATH=$OPENPETRA_HOME/openpetra
 export OPENPETRA_SERVERNAME=localhost
 export OPENPETRA_URL=http://localhost
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
-export GITHUB_USER=openpetra
-export OPENPETRA_BRANCH=dev # TODO: switch to test by default???
+export GIT_URL=https://github.com/openpetra/openpetra.git
+export OPENPETRA_BRANCH=test
 
 nginx_conf()
 {
@@ -399,8 +413,8 @@ install_openpetra()
 
 	while [ $# -gt 0 ]; do
 		case "$1" in
-			--github_user=*)
-				export GITHUB_USER="${1#*=}"
+			--git_url=*)
+				export GIT_URL="${1#*=}"
 				;;
 			--branch=*)
 				export OPENPETRA_BRANCH="${1#*=}"
@@ -532,7 +546,7 @@ install_openpetra()
 
 		if [ ! -d $SRC_PATH ]
 		then
-			git clone --depth 50 https://github.com/$GITHUB_USER/openpetra.git -b $OPENPETRA_BRANCH $SRC_PATH
+			git clone --depth 50 $GIT_URL -b $OPENPETRA_BRANCH $SRC_PATH
 		fi
 		cd $SRC_PATH
 
