@@ -446,6 +446,12 @@ install_openpetra()
 		fi
 	fi
 
+	# you need to run as root
+	if [[ "`whoami`" != "root" ]]; then
+		echo "You need to run this script as root, or with sudo"
+		exit 1
+	fi
+
 	#########################
 	# Which OS and version? #
 	#########################
