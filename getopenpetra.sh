@@ -716,7 +716,7 @@ install_openpetra()
 		sed -i "s/^enabled.*/enabled = 0/g" $repofile
 		cd -
 
-		yum -y install --enablerepo="LBS-solidcharity-openpetra" openpetranow-mysql-test || exit -1
+		yum -y install --enablerepo="lbs-solidcharity-openpetra" openpetranow-mysql-test || exit -1
 
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/openpetra.conf
