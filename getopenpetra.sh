@@ -16,7 +16,7 @@
 #
 # The syntax is:
 #
-#	bash -s [devenv|test|prod]
+#	bash -s [devenv|test|demo|prod]
 #
 # available options:
 #     --git_url=<http git url>
@@ -83,11 +83,22 @@ fastcgi_param  SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
 FINISH
 	fi
 
-	cat $NGINX_TEMPLATE_FILE \
-		| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
-		| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
-		| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
-		> $openpetra_conf_path
+	if [[ "$install_type" == "devenv" ]]; then
+		cat $NGINX_TEMPLATE_FILE \
+			| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
+			| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
+			| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
+			> $openpetra_conf_path
+	else
+		# drop location /phpmyadmin
+		cat $NGINX_TEMPLATE_FILE \
+			| head -n 29 \
+			| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
+			| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
+			| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
+			> $openpetra_conf_path
+		echo "}" >> $openpetra_conf_path
+	fi
 
 	systemctl start nginx
 	systemctl enable nginx
@@ -204,7 +215,13 @@ openpetra_conf_devenv()
 
 install_fedora()
 {
-	dnf -y install git sudo unzip
+	packagesToInstall="sudo"
+	if [[ "$install_type" == "devenv" ]]; then
+		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
+		# need git for devenv
+		packagesToInstall=$packagesToInstall" git unzip"
+	fi
+	dnf -y install $packagesToInstall
 	# for printing reports to pdf
 	dnf -y install wkhtmltopdf
 	if [[ "$install_type" == "devenv" ]]; then
@@ -245,7 +262,13 @@ install_fedora()
 
 install_centos()
 {
-	yum -y install epel-release yum-utils git sudo unzip
+	packagesToInstall="epel-release yum-utils sudo"
+	if [[ "$install_type" == "devenv" ]]; then
+		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
+		# need git for devenv
+		packagesToInstall=$packagesToInstall" git unzip"
+	fi
+	yum -y install $packagesToInstall
 	# install Copr repository for Mono >= 5.10
 	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 	# for printing reports to pdf
@@ -298,7 +321,13 @@ install_centos()
 
 install_debian()
 {
-	apt-get -y install git sudo unzip
+	packagesToInstall="sudo"
+	if [[ "$install_type" == "devenv" ]]; then
+		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
+		# need git for devenv
+		packagesToInstall=$packagesToInstall" git unzip"
+	fi
+	apt-get -y install $packagesToInstall
 	# for printing reports to pdf
 	apt-get -y install wkhtmltopdf
 	if [[ "$install_type" == "devenv" ]]; then
@@ -349,7 +378,13 @@ install_debian()
 
 install_ubuntu()
 {
-	apt-get -y install git sudo unzip
+	packagesToInstall="sudo"
+	if [[ "$install_type" == "devenv" ]]; then
+		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
+		# need git for devenv
+		packagesToInstall=$packagesToInstall" git unzip"
+	fi
+	apt-get -y install $packagesToInstall
 	# for printing reports to pdf
 	if [[ "$VER" == "18.04" ]]; then
 		# we need version 0.12.5, not 0.12.4 which is part of bionic.
@@ -439,10 +474,11 @@ install_openpetra()
 	fi
 
 	# Valid install type is required
-	if [[ "$install_type" != "devenv" && "$install_type" != "test" && "$install_type" != "prod" ]]; then
+	if [[ "$install_type" != "devenv" && "$install_type" != "test" && "$install_type" != "prod" && "$install_type" != "demo" ]]; then
 		echo "You must specify the install type:"
 		echo "  devenv: install a development environment for OpenPetra"
 		echo "  test: install an environment to test OpenPetra"
+		echo "  demo: install a demo server with OpenPetra (only supported on CentOS)"
 		echo "  prod: install a production server with OpenPetra"
 		return 9
 	fi
@@ -489,7 +525,7 @@ install_openpetra()
 		if [[ "$OS" == "Debian GNU/Linux" ]]; then OS="Debian"; OS_FAMILY="Debian"; fi
 		if [[ "$OS" == "Ubuntu" ]]; then OS="Ubuntu"; OS_FAMILY="Debian"; fi
 
-		if [[ "$OS" != "CentOS" 
+		if [[ "$OS" != "CentOS"
 			&& "$OS" != "Fedora"
 			&& "$OS" != "Debian"
 			&& "$OS" != "Ubuntu"
@@ -547,6 +583,9 @@ install_openpetra()
 		if [ ! -d $SRC_PATH ]
 		then
 			git clone --depth 50 $GIT_URL -b $OPENPETRA_BRANCH $SRC_PATH
+			#if you want a full repository clone:
+			#git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
+			#git fetch --unshallow
 		fi
 		cd $SRC_PATH
 
@@ -631,6 +670,67 @@ install_openpetra()
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
+
+		systemctl restart openpetra
+		systemctl restart nginx
+
+		# setup backup of all openpetra databases each night
+		crontab -l | { cat; echo "45 0 * * * $OPENPETRA_SERVER_BIN backupall"; } | crontab -
+
+		echo "Go and check your instance at $OPENPETRA_URL"
+		echo "login with user SYSADMIN and password CHANGEME."
+	fi
+
+	##############################
+	# Setup the demo environment #
+	##############################
+	if [[ "$install_type" == "demo" ]]; then
+
+		if [[ "$OS" != "CentOS" ]]; then
+			echo "Aborted, Your distro is not supported for demo installation: " $OS
+			return 6
+		fi
+
+		if [ -z $OP_CUSTOMER ]; then
+			export OP_CUSTOMER=op_demo
+		fi
+		export OPENPETRA_DBNAME=$OP_CUSTOMER
+		export OPENPETRA_DBUSER=$OP_CUSTOMER
+		export OPENPETRA_USER=openpetra
+		export OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
+		export OPENPETRA_HOME=/home/$OPENPETRA_USER
+		export SRC_PATH=/home/$OPENPETRA_USER
+		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
+		export TEMPLATES_PATH=$SRC_PATH/templates
+		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
+
+		# setup the repository for the openpetranow-mysql-test rpm file
+		# see https://lbs.solidcharity.com/package/solidcharity/openpetra/openpetranow-mysql-test
+		cd /etc/yum.repos.d
+		repourl=https://lbs.solidcharity.com/repos/solidcharity/openpetra/centos/7/lbs-solidcharity-openpetra.repo
+		repofile=`basename $repourl`
+		if [ ! -f $repofile ]
+		then
+		  curl -L $repourl -o $repofile
+		fi
+		sed -i "s/^enabled.*/enabled = 0/g" $repofile
+		cd -
+
+		yum -y install --enablerepo="LBS-solidcharity-openpetra" openpetranow-mysql-test || exit -1
+
+		# configure nginx
+		nginx_conf /etc/nginx/conf.d/openpetra.conf
+
+		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
+		$OPENPETRA_SERVER_BIN initdb || exit -1
+
+		# download and restore demo database
+		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
+		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
+		$OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
+
+		# setup restore of demo database each night
+		crontab -l | { cat; echo "55 0 * * * OP_CUSTOMER=$OP_CUSTOMER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile"; } | crontab -
 
 		systemctl restart openpetra
 		systemctl restart nginx
