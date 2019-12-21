@@ -732,6 +732,8 @@ install_openpetra()
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		$OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
+		chmod a+w /home/$OP_CUSTOMER/log/Server.log
+
 		# setup restore of demo database each night
 		crontab -l | { cat; echo "55 0 * * * OP_CUSTOMER=$OP_CUSTOMER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile"; } | crontab -
 
@@ -739,7 +741,7 @@ install_openpetra()
 		systemctl restart nginx
 
 		echo "Go and check your instance at $OPENPETRA_URL"
-		echo "login with user SYSADMIN and password CHANGEME."
+		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
 	fi
 }
 
