@@ -211,6 +211,8 @@ openpetra_conf_devenv()
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
 	cd -
+	cd $SRC_PATH/js-client && ln -s ../setup/petra0300/releasenotes/ && cd -
+	cd $OPENPETRA_HOME/server/bin && ln -s ../../db/version.txt && cd -
 }
 
 install_fedora()
