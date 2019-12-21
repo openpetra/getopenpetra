@@ -212,6 +212,7 @@ openpetra_conf_devenv()
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
 	cd -
 	cd $SRC_PATH/js-client && ln -s ../setup/petra0300/releasenotes/ && cd -
+	mkdir -p $OPENPETRA_HOME/openpetra/delivery/bin
 	cd $OPENPETRA_HOME/server/bin && ln -s ../../db/version.txt && cd -
 }
 
