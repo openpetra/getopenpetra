@@ -186,6 +186,13 @@ openpetra_conf_devenv()
 		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
+	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+		cat $OPENPETRA_HOME/etc/PetraServerConsole.config \
+			|| sed -e "s~DBHostOrFile.*~DBHostOrFile=\"$OPENPETRA_HOME/db/work.db\"/>\n    <add key=\"Server.DBSqliteSession\" value = \"$OPENPETRA_HOME/db/session.db\" />\n    <add key=\"Server.SQLiteBaseFile\" value = \"$OPENPETRA_HOME/db/base.db\" />~" \
+			> $OPENPETRA_HOME/etc/PetraServerConsole.config.new
+		mv $OPENPETRA_HOME/etc/PetraServerConsole.config.new $OPENPETRA_HOME/etc/PetraServerConsole.config
+	fi
+
 	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
 		| sed -e "s/USERNAME/$userName/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
