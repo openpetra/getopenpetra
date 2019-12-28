@@ -188,7 +188,7 @@ openpetra_conf_devenv()
 
 	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
 		cat $OPENPETRA_HOME/etc/PetraServerConsole.config \
-			|| sed -e "s~DBHostOrFile.*~DBHostOrFile=\"$OPENPETRA_HOME/db/work.db\"/>\n    <add key=\"Server.DBSqliteSession\" value = \"$OPENPETRA_HOME/db/session.db\" />\n    <add key=\"Server.SQLiteBaseFile\" value = \"$OPENPETRA_HOME/db/base.db\" />~" \
+			| sed -e "s~DBHostOrFile.*~DBHostOrFile\" value=\"$OPENPETRA_HOME/db/work.db\"/>\n    <add key=\"Server.DBSqliteSession\" value = \"$OPENPETRA_HOME/db/session.db\" />\n    <add key=\"Server.SQLiteBaseFile\" value = \"$OPENPETRA_HOME/db/base.db\" />~" \
 			> $OPENPETRA_HOME/etc/PetraServerConsole.config.new
 		mv $OPENPETRA_HOME/etc/PetraServerConsole.config.new $OPENPETRA_HOME/etc/PetraServerConsole.config
 	fi
