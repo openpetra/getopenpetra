@@ -612,6 +612,9 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
+		if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
+			cp $OPENPETRA_HOME/openpetra/delivery/sqlite/*.db $OPENPETRA_HOME/db/
+		fi
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
 		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
