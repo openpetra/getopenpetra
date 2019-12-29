@@ -613,7 +613,7 @@ install_openpetra()
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
 		if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-			cp $OPENPETRA_HOME/openpetra/delivery/sqlite/*.db $OPENPETRA_HOME/db/
+			su $OPENPETRA_USER -c "cp $OPENPETRA_HOME/openpetra/delivery/sqlite/*.db $OPENPETRA_HOME/db/"
 		fi
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
