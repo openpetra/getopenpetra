@@ -62,6 +62,7 @@ export OPENPETRA_HOME=/home/$OPENPETRA_USER
 export SRC_PATH=$OPENPETRA_HOME/openpetra
 export OPENPETRA_SERVERNAME=localhost
 export OPENPETRA_URL=http://localhost
+export OPENPETRA_EMAILDOMAIN=example.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
