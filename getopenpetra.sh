@@ -181,6 +181,11 @@ openpetra_conf_devenv()
 		| sed -e "s~PG_OPENPETRA_DBPWD~$OPENPETRA_DBPWD~" \
 		| sed -e "s~OPENPETRA_URL~$OPENPETRA_URL~" \
 		| sed -e "s~OPENPETRA_EMAILDOMAIN~$OPENPETRA_EMAILDOMAIN~" \
+		| sed -e "s~SMTP_HOST~mail.example.org~" \
+		| sed -e "s~SMTP_PORT~25~" \
+		| sed -e "s~SMTP_USERNAME~SMTP_USER_NAME~" \
+		| sed -e "s~SMTP_ENABLESSL~true~" \
+		| sed -e "s~SMTP_AUTHTYPE~config~" \
 		| sed -e "s/USERNAME/$OPENPETRA_USER/" \
 		| sed -e "s#/usr/local/openpetra/bin#$OPENPETRA_HOME/server/bin#" \
 		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
