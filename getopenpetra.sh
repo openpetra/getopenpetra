@@ -58,7 +58,7 @@ export OPENPETRA_DBPWD=TO_BE_SET
 export OPENPETRA_RDBMSType=mysql
 export OPENPETRA_DBHOST=localhost
 export OPENPETRA_DBPORT=3306
-export OPENPETRA_PORT=7000
+export OPENPETRA_HTTP_PORT=80
 export OPENPETRA_USER=openpetra
 export OP_CUSTOMER=
 export OPENPETRA_HOME=/home/$OPENPETRA_USER
@@ -176,7 +176,7 @@ openpetra_conf_devenv()
 	mkdir -p $OPENPETRA_HOME/log
 	# copy config files (server, serveradmin.config) to etc, with adjustments
 	cat $TEMPLATES_PATH/PetraServerConsole.config \
-		| sed -e "s/OPENPETRA_PORT/$OPENPETRA_PORT/" \
+		| sed -e "s/OPENPETRA_PORT/$OPENPETRA_HTTP_PORT/" \
 		| sed -e "s/OPENPETRA_RDBMSType/$OPENPETRA_RDBMSType/" \
 		| sed -e "s/OPENPETRA_DBHOST/$OPENPETRA_DBHOST/" \
 		| sed -e "s/OPENPETRA_DBUSER/$OPENPETRA_DBUSER/" \
