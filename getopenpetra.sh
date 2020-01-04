@@ -203,7 +203,7 @@ openpetra_conf_devenv()
 	fi
 
 	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
-		| sed -e "s/USERNAME/$userName/" \
+		| sed -e "s/USERNAME/$OPENPETRA_USER/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
 		> $OPENPETRA_HOME/etc/PetraServerAdminConsole.config
 
