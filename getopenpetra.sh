@@ -421,12 +421,17 @@ install_ubuntu()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		apt-get -y install nodejs npm
+                if [[ "$APPVEYOR_NODE" == "" ]]; then
+			apt-get -y install nodejs npm
+		fi
 		# for mono development
 		if [[ "$VER" == "18.04" ]]; then
-			apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-			echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-			apt-get update
+			# if we are not on appveyor with already mono >= 5 installed...
+			if [[ "$APPVEYOR_MONO" == "" ]]; then
+				apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+				apt-get update
+			fi
 		fi
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
 	else
