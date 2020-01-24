@@ -233,30 +233,30 @@ install_fedora()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
-	dnf -y install $packagesToInstall
+	dnf -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
-	dnf -y install wkhtmltopdf
+	dnf -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		dnf -y install libXScrnSaver GConf2 Xvfb gtk3
+		dnf -y install libXScrnSaver GConf2 Xvfb gtk3 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		dnf -y install nodejs
+		dnf -y install nodejs || exit -1
 		# for mono development
-		dnf -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+		dnf -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	else
 		# for mono runtime
-		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
-	dnf -y install nginx lsb libsodium
+	dnf -y install nginx lsb libsodium || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		dnf -y install mariadb-server
+		dnf -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
 			# phpmyadmin
-			dnf -y install phpMyAdmin php-fpm
+			dnf -y install phpMyAdmin php-fpm || exit -1
 			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
@@ -266,7 +266,7 @@ install_fedora()
 			systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		dnf -y install postgresql-server
+		dnf -y install postgresql-server || exit -1
 	fi
 }
 
@@ -278,42 +278,42 @@ install_centos()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
-	yum -y install $packagesToInstall
+	yum -y install $packagesToInstall || exit -1
 	# install Copr repository for Mono >= 5.10
 	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
-		yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm
+		yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		yum -y install libXScrnSaver GConf2 Xvfb gtk3
+		yum -y install libXScrnSaver GConf2 Xvfb gtk3 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
-		yum -y install nodejs
+		yum -y install nodejs || exit -1
 		# for mono development
-		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	else
 		# for mono runtime
-		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel
+		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
 	# update the certificates for Mono
 	curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-	yum -y install nginx lsb libsodium
+	yum -y install nginx lsb libsodium || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		yum -y install mariadb-server
+		yum -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
 			# phpmyadmin
 			if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
-				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm || exit -1
 			fi
 			yum-config-manager --enable remi-php71
 			yum-config-manager --enable remi
-			yum -y install phpMyAdmin php-fpm
+			yum -y install phpMyAdmin php-fpm || exit -1
 			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
@@ -323,7 +323,7 @@ install_centos()
 			systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		yum -y install postgresql-server
+		yum -y install postgresql-server || exit -1
 	fi
 }
 
@@ -335,18 +335,18 @@ install_debian()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
-	apt-get -y install $packagesToInstall
+	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
-	apt-get -y install wkhtmltopdf
+	apt-get -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver
+		apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		apt-get -y install nodejs npm
+		apt-get -y install nodejs npm || exit -1
 		# for mono development
 		if [[ "$VER" == "10" ]]; then
 			# for nant
@@ -354,17 +354,17 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update
 		fi
-		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	else
-		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	fi
 	# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
-	apt-get -y install nginx libsodium23
+	apt-get -y install nginx libsodium23 || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		apt-get -y install mariadb-server
+		apt-get -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
 			echo "TODO: phpmyadmin"
 			# phpmyadmin
@@ -378,7 +378,7 @@ install_debian()
 			#systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		apt-get -y install postgresql-server
+		apt-get -y install postgresql-server || exit -1
 	fi
 }
 
@@ -390,6 +390,7 @@ install_ubuntu()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
+	apt-get update
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
 	if [[ "$VER" == "18.04" ]]; then
@@ -428,7 +429,7 @@ install_ubuntu()
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
-	apt-get -y install nginx libsodium23 lsb
+	apt-get -y install nginx libsodium23 lsb || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		if [[ "$APPVEYOR_MARIADB" == "" ]]; then
 			apt-get -y install mariadb-server || exit -1
