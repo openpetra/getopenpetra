@@ -408,7 +408,7 @@ install_ubuntu()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-                if [[ "$APPVEYOR_NODE" == "" ]]; then
+		if [[ "$APPVEYOR_NODE" == "" ]]; then
 			apt-get -y install nodejs npm || exit -1
 		fi
 		# for mono development
@@ -430,7 +430,9 @@ install_ubuntu()
 	fi
 	apt-get -y install nginx libsodium23 lsb
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		apt-get -y install mariadb-server || exit -1
+		if [[ "$APPVEYOR_MARIADB" == "" ]]; then
+			apt-get -y install mariadb-server || exit -1
+		fi
 		if [[ "$install_type" == "devenv" ]]; then
 			echo "TODO: phpmyadmin"
 			# phpmyadmin
