@@ -25,7 +25,7 @@
 #            default is: --branch=test
 #     --dbms=<dbms>
 #            default is: --dbms=mysql
-#            other options: postgresql, sqlite
+#            other options: postgresql
 #     --url=<outside url>
 #            default is: --url=http://localhost
 #            for demo: --url=https://demo.openpetra.org
@@ -195,13 +195,6 @@ openpetra_conf_devenv()
 		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
-	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		cat $OPENPETRA_HOME/etc/PetraServerConsole.config \
-			| sed -e "s~DBHostOrFile.*~DBHostOrFile\" value=\"$OPENPETRA_HOME/db/work.db\"/>\n    <add key=\"Server.DBSqliteSession\" value = \"$OPENPETRA_HOME/db/session.db\" />\n    <add key=\"Server.SQLiteBaseFile\" value = \"$OPENPETRA_HOME/db/base.db\" />~" \
-			> $OPENPETRA_HOME/etc/PetraServerConsole.config.new
-		mv $OPENPETRA_HOME/etc/PetraServerConsole.config.new $OPENPETRA_HOME/etc/PetraServerConsole.config
-	fi
-
 	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
 		| sed -e "s/USERNAME/$OPENPETRA_USER/" \
 		| sed -e "s#/openpetraOPENPETRA_PORT/#:$OPENPETRA_HTTP_PORT/#" \
@@ -274,8 +267,6 @@ install_fedora()
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		dnf -y install postgresql-server
-	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		dnf -y install sqlite
 	fi
 }
 
@@ -333,8 +324,6 @@ install_centos()
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		yum -y install postgresql-server
-	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		yum -y install sqlite
 	fi
 }
 
@@ -390,8 +379,6 @@ install_debian()
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		apt-get -y install postgresql-server
-	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		apt-get -y install sqlite
 	fi
 }
 
@@ -403,7 +390,7 @@ install_ubuntu()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
-	apt-get -y install $packagesToInstall
+	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
 	if [[ "$VER" == "18.04" ]]; then
 		# we need version 0.12.5, not 0.12.4 which is part of bionic.
@@ -411,18 +398,18 @@ install_ubuntu()
 		apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb
 		rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
 	else
-		apt-get -y install wkhtmltopdf
+		apt-get -y install wkhtmltopdf || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		apt-get -y install gconf2 xvfb libgdk-pixbuf2.0-0 libgtk-3-0 libxss1 libasound2
+		apt-get -y install gconf2 xvfb libgdk-pixbuf2.0-0 libgtk-3-0 libxss1 libasound2 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
                 if [[ "$APPVEYOR_NODE" == "" ]]; then
-			apt-get -y install nodejs npm
+			apt-get -y install nodejs npm || exit -1
 		fi
 		# for mono development
 		if [[ "$VER" == "18.04" ]]; then
@@ -433,9 +420,9 @@ install_ubuntu()
 				apt-get update
 			fi
 		fi
-		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	else
-		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus
+		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	fi
 	# to avoid errors like: error CS0433: The imported type `System.CodeDom.Compiler.CompilerError' is defined multiple times
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
@@ -443,7 +430,7 @@ install_ubuntu()
 	fi
 	apt-get -y install nginx libsodium23 lsb
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		apt-get -y install mariadb-server
+		apt-get -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
 			echo "TODO: phpmyadmin"
 			# phpmyadmin
@@ -457,9 +444,7 @@ install_ubuntu()
 			#systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		apt-get -y install postgresql-server
-	elif [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		apt-get -y install sqlite
+		apt-get -y install postgresql-server || exit -1
 	fi
 }
 
@@ -494,9 +479,7 @@ install_openpetra()
 		shift
 	done
 
-	if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-		OPENPETRA_DBPWD=
-	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
+	if [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		OPENPETRA_DBPORT=5432
 	fi
 
@@ -629,9 +612,6 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
-		if [[ "$OPENPETRA_RDBMSType" == "sqlite" ]]; then
-			su $OPENPETRA_USER -c "cp $OPENPETRA_HOME/openpetra/delivery/sqlite/*.db $OPENPETRA_HOME/db/"
-		fi
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
 		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
