@@ -612,6 +612,13 @@ install_openpetra()
 		export NGINX_TEMPLATE_FILE=$SRC_PATH/setup/petra0300/linuxserver/nginx.conf
 		export TEMPLATES_PATH=$SRC_PATH/setup/petra0300/linuxserver
 
+		if [ ! -z "$APPVEYOR" ]; then
+			if [ -d /home/appveyor/projects/openpetra ]; then
+				mkdir -p $SRC_PATH
+				cp -R /home/appveyor/projects/openpetra/* $SRC_PATH
+			fi
+		fi
+
 		if [ ! -d $SRC_PATH ]
 		then
 			git clone --depth 50 $GIT_URL -b $OPENPETRA_BRANCH $SRC_PATH
