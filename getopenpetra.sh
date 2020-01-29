@@ -639,16 +639,21 @@ install_openpetra()
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
 		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
-		su $OPENPETRA_USER --preserve-environment -c "nant install.js" || exit -1
+		if [[ -z $APPVEYOR_MONO ]]; then
+			su $OPENPETRA_USER --preserve-environment -c "nant install.js" || exit -1
+		fi
 
 		# for fixing issues on CentOS, pushing to upstream branches
 		git config --global push.default simple
 		su $OPENPETRA_USER -c "git config --global push.default simple"
 
 		# for the cypress test environment
-		su $OPENPETRA_USER --preserve-environment -c "cd js-client && CI=1 npm install cypress@3.7.0 --save --save-exact --quiet" || exit -1
+		if [[ -z $APPVEYOR_MONO ]]; then
+			su $OPENPETRA_USER --preserve-environment -c "cd js-client && CI=1 npm install cypress@3.7.0 --save --save-exact --quiet" || exit -1
+		fi
 
 		# download and restore demo database
+cat /home/op_dev/etc/PetraServerConsole.config
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
