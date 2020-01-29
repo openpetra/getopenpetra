@@ -442,6 +442,7 @@ install_ubuntu()
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
 	apt-get -y install libsodium23 lsb || exit -1
+	apt-get -y install nginx || exit -1
 
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		if [[ "$APPVEYOR_MARIADB" == "" ]]; then
