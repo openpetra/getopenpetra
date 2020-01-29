@@ -392,14 +392,15 @@ install_ubuntu()
 	fi
 
 	if [[ ! -z $APPVEYOR_MONO ]]; then
-	#	cat /etc/apt/sources.list | grep mono > /etc/apt/sources.list.d/mono.list
-	#	sed -i  "/mono/s/^/#/" /etc/apt/sources.list
-	#	apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-
 		# On AppVeyor, disable security updates 
 		# because that would require to run apt-get update to get latest nginx and mysql packages.
 		# but that would lead for mono 6.8 to be downloaded, and that takes quite some time to install (mscorlib is compiled etc).
 		sed -i  "/security/s/^/#/" /etc/apt/sources.list
+
+		# move mono repo to separate list, so that we can do an apt-get update without getting latest version of Mono
+		cat /etc/apt/sources.list | grep mono > /etc/apt/sources.list.d/mono.list
+		sed -i  "/mono/s/^/#/" /etc/apt/sources.list
+		apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
 	fi
 
 	apt-get -y install $packagesToInstall || exit -1
