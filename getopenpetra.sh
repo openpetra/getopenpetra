@@ -72,11 +72,6 @@ export OPENPETRA_BRANCH=test
 
 nginx_conf()
 {
-	if [[ ! -z $APPVEYOR_MONO ]]; then
-		# On AppVeyor, we don't install nginx, see comments below in Ubuntu section
-		return
-	fi
-
 	openpetra_conf_path="$1"
 	# let the default nginx server run on another port
 	sed -i "s/listen\(.*\)80/listen\181/g" /etc/nginx/nginx.conf
@@ -396,11 +391,16 @@ install_ubuntu()
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 
-	#if [[ ! -z $APPVEYOR_MONO ]]; then
+	if [[ ! -z $APPVEYOR_MONO ]]; then
 	#	cat /etc/apt/sources.list | grep mono > /etc/apt/sources.list.d/mono.list
 	#	sed -i  "/mono/s/^/#/" /etc/apt/sources.list
 	#	apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-	#fi
+
+		# On AppVeyor, disable security updates 
+		# because that would require to run apt-get update to get latest nginx and mysql packages.
+		# but that would lead for mono 6.8 to be downloaded, and that takes quite some time to install (mscorlib is compiled etc).
+		sed -i  "/security/s/^/#/" /etc/apt/sources.list
+	fi
 
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
@@ -441,13 +441,6 @@ install_ubuntu()
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
 	apt-get -y install libsodium23 lsb || exit -1
-
-
-	# On AppVeyor, we cannot install nginx, because that would require to run apt-get update to get latest nginx packages.
-	# but that would lead for mono 6.8 to be downloaded, and that takes quite some time to install (mscorlib is compiled etc).
-	if [[ -z $APPVEYOR_MONO ]]; then
-		apt-get -y install nginx
-	fi
 
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		if [[ "$APPVEYOR_MARIADB" == "" ]]; then
