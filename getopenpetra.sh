@@ -445,7 +445,7 @@ install_ubuntu()
 	apt-get -y install nginx || exit -1
 
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		if [[ "$APPVEYOR_MARIADB" == "" ]]; then
+		if [[ "$APPVEYOR_MYSQL" == "" ]]; then
 			apt-get -y install mariadb-server || exit -1
 		fi
 		if [[ "$install_type" == "devenv" ]]; then
@@ -612,6 +612,8 @@ install_openpetra()
 				mkdir -p $SRC_PATH
 				cp -R /home/appveyor/projects/openpetra/* $SRC_PATH
 			fi
+			# avoid error: Unable to connect to any of the specified MySQL hosts. MySQL Error Number: 1042
+			OPENPETRA_DBHOST=127.0.0.1
 		fi
 
 		if [ ! -d $SRC_PATH ]
@@ -653,7 +655,6 @@ install_openpetra()
 		fi
 
 		# download and restore demo database
-cat /home/op_dev/etc/PetraServerConsole.config
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
