@@ -293,7 +293,7 @@ install_centos()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		curl --silent --location https://rpm.nodesource.com/setup_8.x  | bash -
+		curl --silent --location https://rpm.nodesource.com/setup_10.x  | bash -
 		yum -y install nodejs || exit -1
 		# for mono development
 		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
