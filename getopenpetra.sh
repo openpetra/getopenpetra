@@ -642,7 +642,7 @@ install_openpetra()
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
 		su $OPENPETRA_USER -c "nant install.net -D:with-restart=false" || exit -1
 		if [[ -z $APPVEYOR_MONO ]]; then
-			su $OPENPETRA_USER --preserve-environment -c "nant install.js" || exit -1
+			su $OPENPETRA_USER -c "nant install.js" || exit -1
 		fi
 
 		# for fixing issues on CentOS, pushing to upstream branches
@@ -651,7 +651,7 @@ install_openpetra()
 
 		# for the cypress test environment
 		if [[ -z $APPVEYOR_MONO ]]; then
-			su $OPENPETRA_USER --preserve-environment -c "cd js-client && CI=1 npm install cypress@3.7.0 --save --save-exact --quiet" || exit -1
+			su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress@3.7.0 --save --save-exact --quiet" || exit -1
 		fi
 
 		# download and restore demo database
