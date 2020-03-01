@@ -47,7 +47,7 @@
 #
 # This should work on CentOS 7 and Fedora 31,
 # and Ubuntu 19.10 (Eoan Ermine), Ubuntu 18.04 (Bionic Beaver)
-# and Debian 10 (Buster).
+# and Debian 9 (Stretch), Debian 10 (Buster).
 # Please open an issue if you notice any bugs.
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
