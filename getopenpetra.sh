@@ -143,7 +143,7 @@ openpetra_conf()
 	# install OpenPetra service file
 	systemdpath="/usr/lib/systemd/system"
 	if [ ! -d $systemdpath ]; then
-		# Ubuntu Bionic
+		# Ubuntu Bionic, and Debian Stretch
 		systemdpath="/lib/systemd/system"
 	fi
 	cat $OPENPETRA_SERVICE_FILE \
@@ -335,6 +335,9 @@ install_debian()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
+	if [[ "$install_type" == "test" || "$install_type" == "demo" ]]; then
+		packagesToInstall=$packagesToInstall" crontab"
+	fi
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
 	apt-get -y install wkhtmltopdf || exit -1
@@ -354,6 +357,15 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update
 		fi
+	fi
+	# For Debian Stretch, get Xamarin Mono packages, because Debian Stretch only has Mono 4.6
+	if [[ "$VER" == "9" ]]; then
+		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
+		apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+		echo "deb https://download.mono-project.com/repo/debian stable-stretch main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+		apt-get update
+	fi
+	if [[ "$install_type" == "devenv" ]]; then
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	else
 		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
@@ -362,7 +374,12 @@ install_debian()
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
-	apt-get -y install nginx libsodium23 || exit -1
+	apt-get -y install nginx || exit -1
+	if [[ "$VER" == "9" ]]; then
+		apt-get -y install libsodium18 || exit -1
+	else
+		apt-get -y install libsodium23 || exit -1
+	fi
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		apt-get -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
@@ -389,6 +406,9 @@ install_ubuntu()
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
+	fi
+	if [[ "$install_type" == "test" || "$install_type" == "demo" ]]; then
+		packagesToInstall=$packagesToInstall" crontab"
 	fi
 
 	if [[ ! -z $APPVEYOR_MONO ]]; then
@@ -419,19 +439,19 @@ install_ubuntu()
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
+	# Ubuntu Bionic has Mono 4.6, therefore we use the Xamarin Mono
+	if [[ "$VER" == "18.04" ]]; then
+		# if we are not on appveyor with already mono >= 5 installed...
+		if [[ "$APPVEYOR_MONO" == "" ]]; then
+			apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+			echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+			apt-get update
+		fi
+	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
 			apt-get -y install nodejs npm || exit -1
-		fi
-		# for mono development
-		if [[ "$VER" == "18.04" ]]; then
-			# if we are not on appveyor with already mono >= 5 installed...
-			if [[ "$APPVEYOR_MONO" == "" ]]; then
-				apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-				echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-				apt-get update
-			fi
 		fi
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	else
@@ -569,7 +589,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != "10" && "$VER" != "18.04"  && "$VER" != "19.10" ]]; then
+			if [[ "$VER" != "9" && "$VER" != "10" && "$VER" != "18.04"  && "$VER" != "19.10" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
