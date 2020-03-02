@@ -336,7 +336,7 @@ install_debian()
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 	if [[ "$install_type" == "test" || "$install_type" == "demo" ]]; then
-		packagesToInstall=$packagesToInstall" crontab"
+		packagesToInstall=$packagesToInstall" cron"
 	fi
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
@@ -408,7 +408,7 @@ install_ubuntu()
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 	if [[ "$install_type" == "test" || "$install_type" == "demo" ]]; then
-		packagesToInstall=$packagesToInstall" crontab"
+		packagesToInstall=$packagesToInstall" cron"
 	fi
 
 	if [[ ! -z $APPVEYOR_MONO ]]; then
