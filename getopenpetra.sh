@@ -350,7 +350,7 @@ install_debian()
 	if [[ "$install_type" == "devenv" ]]; then
 
 		if [[ "$VER" == "9" ]]; then
-			curl --silent --location https://rpm.nodesource.com/setup_10.x  | bash -
+			curl --silent --location https://deb.nodesource.com/setup_10.x  | bash -
 		fi
 
 		# for building the js client
