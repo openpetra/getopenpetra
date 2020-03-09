@@ -348,6 +348,11 @@ install_debian()
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
+
+		if [[ "$VER" == "9" ]]; then
+			curl --silent --location https://rpm.nodesource.com/setup_10.x  | bash -
+		fi
+
 		# for building the js client
 		apt-get -y install nodejs npm || exit -1
 		# for mono development
