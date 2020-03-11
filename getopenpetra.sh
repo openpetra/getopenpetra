@@ -356,6 +356,12 @@ install_debian()
 		# for building the js client
 		apt-get -y install nodejs npm || exit -1
 		# for mono development
+		if [[ "$VER" == "9" ]]; then
+			# for nant
+			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/stretch stretch main' >> /etc/apt/sources.list
+			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+			apt-get update
+		fi
 		if [[ "$VER" == "10" ]]; then
 			# for nant
 			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
