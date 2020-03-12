@@ -369,11 +369,12 @@ install_debian()
 			apt-get update
 		fi
 	fi
-	# For Debian Stretch, get Xamarin Mono packages, because Debian Stretch only has Mono 4.6
+	# For Debian Stretch, get Mono packages compiled by SolidCharity.com, because Debian Stretch only has Mono 4.6
+	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
 	if [[ "$VER" == "9" ]]; then
 		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
-		apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-		echo "deb https://download.mono-project.com/repo/debian stable-stretch main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+		echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/mono/debian/stretch stretch main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
 		apt-get update
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
@@ -450,12 +451,13 @@ install_ubuntu()
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
-	# Ubuntu Bionic has Mono 4.6, therefore we use the Xamarin Mono
+	# Ubuntu Bionic has Mono 4.6, therefore we use our own compiled Mono.
+	# Mono compiled by Xamarin takes too much time to install during CI...
 	if [[ "$VER" == "18.04" ]]; then
 		# if we are not on appveyor with already mono >= 5 installed...
 		if [[ "$APPVEYOR_MONO" == "" ]]; then
-			apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-			echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/mono/ubuntu/bionic bionic main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
 			apt-get update
 		fi
 	fi
