@@ -132,10 +132,15 @@ openpetra_conf()
 
 			if [ -f /usr/lib64/libsodium.so.18 ]; then
 				ln -s /usr/lib64/libsodium.so.18 $OPENPETRA_HOME/server/bin/libsodium.so
+			elif [ -f /usr/lib/x86_64-linux-gnu/libsodium.so.18 ]; then
+				ln -s /usr/lib/x86_64-linux-gnu/libsodium.so.18 $OPENPETRA_HOME/server/bin/libsodium.so
 			elif [ -f /usr/lib64/libsodium.so.23 ]; then
 				ln -s /usr/lib64/libsodium.so.23 $OPENPETRA_HOME/server/bin/libsodium.so
 			elif [ -f /usr/lib/x86_64-linux-gnu/libsodium.so.23 ]; then
 				ln -s /usr/lib/x86_64-linux-gnu/libsodium.so.23 $OPENPETRA_HOME/server/bin/libsodium.so
+			else
+				echo "Error: cannot find libsodium!"
+				exit -1
 			fi
 		done
 	fi
