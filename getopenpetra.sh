@@ -345,7 +345,14 @@ install_debian()
 	fi
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
-	apt-get -y install wkhtmltopdf || exit -1
+	if [[ "$VER" == "9" ]]; then
+		# we need version 0.12.5, not 0.12.3 which is part of stretch.
+		curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb > wkhtmltox_0.12.5-1.stretch_amd64.deb
+		apt-get -y install ./wkhtmltox_0.12.5-1.stretch_amd64.deb
+		rm -Rf wkhtmltox_0.12.5-1.stretch_amd64.deb
+	else
+		apt-get -y install wkhtmltopdf || exit -1
+	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
 		apt-get -y install gconf2 xvfb libnss3 libxss1 libasound2 # libgtk3.0-cil libXScrnSaver || exit -1
