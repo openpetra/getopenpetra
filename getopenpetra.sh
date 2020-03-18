@@ -288,7 +288,8 @@ install_centos()
 	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
-		yum -y install https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm || exit -1
+		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm"
+		yum -y install $url || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
@@ -347,8 +348,9 @@ install_debian()
 	# for printing reports to pdf
 	if [[ "$VER" == "9" ]]; then
 		# we need version 0.12.5, not 0.12.3 which is part of stretch.
-		curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb > wkhtmltox_0.12.5-1.stretch_amd64.deb
-		apt-get -y install ./wkhtmltox_0.12.5-1.stretch_amd64.deb
+		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb"
+		curl --silent --location $url > wkhtmltox_0.12.5-1.stretch_amd64.deb || exit -1
+		apt-get -y install ./wkhtmltox_0.12.5-1.stretch_amd64.deb || exit -1
 		rm -Rf wkhtmltox_0.12.5-1.stretch_amd64.deb
 	else
 		apt-get -y install wkhtmltopdf || exit -1
@@ -451,8 +453,9 @@ install_ubuntu()
 	# for printing reports to pdf
 	if [[ "$VER" == "18.04" ]]; then
 		# we need version 0.12.5, not 0.12.4 which is part of bionic.
-		curl --silent --location https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb > wkhtmltox_0.12.5-1.bionic_amd64.deb
-		apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb
+		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb"
+		curl --silent --location $url > wkhtmltox_0.12.5-1.bionic_amd64.deb || exit -1
+		apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb || exit -1
 		rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
 	else
 		apt-get -y install wkhtmltopdf || exit -1
