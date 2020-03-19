@@ -119,7 +119,7 @@ openpetra_conf()
 	useradd --shell /bin/bash --home $OPENPETRA_HOME --create-home $OPENPETRA_USER
 
 	if [[ "$install_type" == "test" ]]; then
-		for d in openpetra-201*; do
+		for d in openpetra-20*; do
 			mv $d/* $OPENPETRA_HOME
 			rm -Rf $d
 			chmod a+r -R $OPENPETRA_HOME
