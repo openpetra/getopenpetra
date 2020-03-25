@@ -159,6 +159,18 @@ openpetra_conf()
 	mkdir -p $OPENPETRA_HOME/etc
 	cp $TEMPLATES_PATH/common.config $OPENPETRA_HOME/etc/common.config
 
+	if [[ "$install_type" == "devenv" ]]; then
+		mkdir /tmp/bootstrap
+		cd /tmp/bootstrap
+		curl --silent --location https://github.com/twbs/bootstrap/releases/download/v4.0.0/bootstrap-4.0.0-dist.zip > bootstrap-4.0.0-dist.zip
+		unzip bootstrap-4.0.0-dist.zip
+		mkdir -p $OPENPETRA_HOME/bootstrap-4.0
+		mv js/bootstrap.bundle.min.js $OPENPETRA_HOME/bootstrap-4.0
+		mv css/bootstrap.min.css $OPENPETRA_HOME/bootstrap-4.0
+		cd -
+		rm -Rf /tmp/bootstrap
+	fi
+
 	systemctl enable openpetra
 	systemctl start openpetra
 }
