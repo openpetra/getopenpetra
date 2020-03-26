@@ -10,9 +10,9 @@
 # You have various options, to install a development environment, or to 
 # install a test environment, or to install a production environment.
 #
-#	$ curl https://getopenpetra.com | bash -s devenv
+#	$ curl https://get.openpetra.org | bash -s devenv
 #	 or
-#	$ wget -qO- https://getopenpetra.com | bash -s devenv
+#	$ wget -qO- https://get.openpetra.org | bash -s devenv
 #
 # The syntax is:
 #
@@ -754,7 +754,7 @@ install_openpetra()
 
 		# get the binary tarball
 		if [ ! -f openpetra-latest-bin.tar.gz ]; then
-			curl --silent --location https://getopenpetra.com/openpetra-latest-bin.tar.gz > openpetra-latest-bin.tar.gz
+			curl --silent --location https://get.openpetra.org/openpetra-latest-bin.tar.gz > openpetra-latest-bin.tar.gz
 		fi
 
 		rm -Rf openpetra-2*
