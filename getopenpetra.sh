@@ -204,7 +204,7 @@ openpetra_conf_devenv()
 		| sed -e "s/OPENPETRA_DBUSER/$OPENPETRA_DBUSER/" \
 		| sed -e "s/OPENPETRA_DBNAME/$OPENPETRA_DBNAME/" \
 		| sed -e "s/OPENPETRA_DBPORT/$OPENPETRA_DBPORT/" \
-		| sed -e "s~PG_OPENPETRA_DBPWD~$OPENPETRA_DBPWD~" \
+		| sed -e "s~OPENPETRA_DBPWD~$OPENPETRA_DBPWD~" \
 		| sed -e "s~OPENPETRA_URL~$OPENPETRA_URL~" \
 		| sed -e "s~OPENPETRA_EMAILDOMAIN~$OPENPETRA_EMAILDOMAIN~" \
 		| sed -e "s~SMTP_HOST~mail.example.org~" \
