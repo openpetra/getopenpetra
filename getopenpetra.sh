@@ -191,8 +191,11 @@ openpetra_conf_devenv()
 		| sed -e "s/OPENPETRA_DBPWD/$OPENPETRA_DBPWD/g" \
 		> $SRC_PATH/OpenPetra.build.config
 
-	mkdir -p $OPENPETRA_HOME/etc
 	mkdir -p $OPENPETRA_HOME/log
+	mkdir -p $OPENPETRA_HOME/etc
+	mkdir -p $OPENPETRA_HOME/tmp
+	mkdir -p $OPENPETRA_HOME/backup
+
 	# copy config files (server, serveradmin.config) to etc, with adjustments
 	cat $TEMPLATES_PATH/PetraServerConsole.config \
 		| sed -e "s/OPENPETRA_PORT/$OPENPETRA_HTTP_PORT/" \
@@ -210,8 +213,9 @@ openpetra_conf_devenv()
 		| sed -e "s~SMTP_ENABLESSL~true~" \
 		| sed -e "s~SMTP_AUTHTYPE~config~" \
 		| sed -e "s/USERNAME/$OPENPETRA_USER/" \
-		| sed -e "s#/usr/local/openpetra/bin#$OPENPETRA_HOME/server/bin#" \
-		| sed -e "s#/usr/local/openpetra#$OPENPETRA_HOME#" \
+		| sed -e "s#OPENPETRAPATH#$OPENPETRA_HOME#" \
+		| sed -i "s#AUTHTOKENINITIALISATION##" \
+		| sed -i "s#LICENSECHECK_URL##" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
 	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
