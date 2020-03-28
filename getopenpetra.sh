@@ -214,8 +214,8 @@ openpetra_conf_devenv()
 		| sed -e "s~SMTP_AUTHTYPE~config~" \
 		| sed -e "s/USERNAME/$OPENPETRA_USER/" \
 		| sed -e "s#OPENPETRAPATH#$OPENPETRA_HOME#" \
-		| sed -i "s#AUTHTOKENINITIALISATION##" \
-		| sed -i "s#LICENSECHECK_URL##" \
+		| sed -e "s#AUTHTOKENINITIALISATION##" \
+		| sed -e "s#LICENSECHECK_URL##" \
 		> $OPENPETRA_HOME/etc/PetraServerConsole.config
 
 	cat $TEMPLATES_PATH/PetraServerAdminConsole.config \
