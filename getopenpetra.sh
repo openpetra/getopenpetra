@@ -95,10 +95,10 @@ FINISH
 			> $openpetra_conf_path
 	else
 		# drop location phpMyAdmin
+		# drop the redirect for phpMyAdmin
+		# replace some variables
 		awk '/location \/phpMyAdmin/ {exit} {print}' $NGINX_TEMPLATE_FILE \
-			# drop the redirect for phpMyAdmin
 			| grep -v phpMyAdmin
-			# replace some variables
 			| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
 			| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
 			| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
