@@ -72,7 +72,7 @@ export OPENPETRA_BRANCH=test
 
 nginx_conf()
 {
-	openpetra_conf_path="$1"
+	nginx_conf_path="$1"
 	# let the default nginx server run on another port
 	sed -i "s/listen\(.*\)80/listen\181/g" /etc/nginx/nginx.conf
 	if [ -f /etc/nginx/sites-enabled/default ]; then
@@ -88,27 +88,22 @@ FINISH
 	fi
 
 	if [[ "$install_type" == "devenv" ]]; then
-		cat $NGINX_TEMPLATE_FILE \
-			| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
-			| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
-			| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
-			> $openpetra_conf_path
+		cp $NGINX_TEMPLATE_FILE $nginx_conf_path
 	else
 		# drop location phpMyAdmin
 		# drop the redirect for phpMyAdmin
-		# replace some variables
 		awk '/location \/phpMyAdmin/ {exit} {print}' $NGINX_TEMPLATE_FILE \
 			| grep -v phpMyAdmin \
-			| sed -e "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" \
-			| sed -e "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" \
-			| sed -e "s#OPENPETRA_URL#$OPENPETRA_URL#g" \
-			> $openpetra_conf_path
-		echo "}" >> $openpetra_conf_path
+			> $nginx_conf_path
+		echo "}" >> $nginx_conf_path
 	fi
+
+	sed -i "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" $nginx_conf_path
+	sed -i "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" $nginx_conf_path
+	sed -i "s#OPENPETRA_URL#$OPENPETRA_URL#g" $nginx_conf_path
 
 	systemctl start nginx
 	systemctl enable nginx
-
 }
 
 generatepwd()
