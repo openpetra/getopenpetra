@@ -99,6 +99,7 @@ FINISH
 	fi
 
 	sed -i "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" $nginx_conf_path
+	sed -i "s#OPENPETRA_PORT#$OPENPETRA_PORT#g" $nginx_conf_path
 	sed -i "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" $nginx_conf_path
 	sed -i "s#OPENPETRA_URL#$OPENPETRA_URL#g" $nginx_conf_path
 
@@ -691,7 +692,7 @@ install_openpetra()
 		openpetra_conf_devenv
 
 		# configure nginx
-		nginx_conf /etc/nginx/conf.d/openpetra.conf
+		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
 
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
@@ -765,7 +766,7 @@ install_openpetra()
 		openpetra_conf
 
 		# configure nginx
-		nginx_conf /etc/nginx/conf.d/openpetra.conf
+		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
 
 		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
 
@@ -820,7 +821,7 @@ install_openpetra()
 		yum -y install --enablerepo="lbs-solidcharity-openpetra" openpetranow-mysql-test || exit -1
 
 		# configure nginx
-		nginx_conf /etc/nginx/conf.d/openpetra.conf
+		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
