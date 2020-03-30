@@ -99,7 +99,7 @@ FINISH
 	fi
 
 	sed -i "s/OPENPETRA_SERVERNAME/$OPENPETRA_SERVERNAME/g" $nginx_conf_path
-	sed -i "s#OPENPETRA_PORT#$OPENPETRA_PORT#g" $nginx_conf_path
+	sed -i "s#OPENPETRA_PORT#$OPENPETRA_HTTP_PORT#g" $nginx_conf_path
 	sed -i "s#OPENPETRA_HOME#$OPENPETRA_HOME#g" $nginx_conf_path
 	sed -i "s#OPENPETRA_URL#$OPENPETRA_URL#g" $nginx_conf_path
 
