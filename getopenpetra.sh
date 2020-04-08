@@ -713,7 +713,7 @@ install_openpetra()
 
 		# for the cypress test environment
 		if [[ -z $APPVEYOR_MONO ]]; then
-			su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress@3.8.3 --save --save-exact --quiet" || exit -1
+			su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress@4.3.0 --save --save-exact --quiet" || exit -1
 		fi
 
 		# download and restore demo database
