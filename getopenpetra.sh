@@ -695,7 +695,7 @@ install_openpetra()
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
 
-		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
+		chown -R $OPENPETRA_USER:openpetra $OPENPETRA_HOME
 
 		# configure database
 		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
@@ -769,7 +769,7 @@ install_openpetra()
 		# configure nginx
 		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
 
-		chown -R $OPENPETRA_USER:$OPENPETRA_USER $OPENPETRA_HOME
+		chown -R $OPENPETRA_USER:openpetra $OPENPETRA_HOME
 
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
