@@ -238,6 +238,7 @@ openpetra_conf_devenv()
 	ln -s $MY_SRC_PATH_SERVER/delivery $SRC_PATH/delivery/api
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
+	ln -s $MY_SRC_PATH_SERVER/setup/petra0300/linuxserver $OPENPETRA_HOME/templates
 	cd -
 	cd $SRC_PATH/js-client && ln -s ../setup/petra0300/releasenotes/ && cd -
 	mkdir -p $OPENPETRA_HOME/openpetra/delivery/bin
