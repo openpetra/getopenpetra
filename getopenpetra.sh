@@ -114,7 +114,7 @@ generatepwd()
 
 openpetra_conf()
 {
-	useradd --shell /bin/bash --home $OPENPETRA_HOME --create-home $OPENPETRA_USER
+	useradd --shell /bin/bash --home $OPENPETRA_HOME --create-home -G openpetra $OPENPETRA_USER
 
 	if [[ "$install_type" == "test" ]]; then
 		for d in openpetra-20*; do
