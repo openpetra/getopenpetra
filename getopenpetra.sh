@@ -45,7 +45,7 @@
 #
 #	$ curl https://getopenpetra.com | bash -s prod
 #
-# This should work on CentOS 7 and Fedora 31,
+# This should work on CentOS 7 and 8, Fedora 31 and 32
 # and Ubuntu 20.04 (Focal Fossa), Ubuntu 19.10 (Eoan Ermine), Ubuntu 18.04 (Bionic Beaver)
 # and Debian 9 (Stretch), Debian 10 (Buster).
 # Please open an issue if you notice any bugs.
@@ -300,11 +300,17 @@ install_centos()
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 	yum -y install $packagesToInstall || exit -1
-	# install Copr repository for Mono >= 5.10
-	su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
+	if [[ "$VER" == "7" ]]; then
+		# install Copr repository for Mono >= 5.10
+		su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
+	fi
+	if [[ "$VER" == "8" ]]; then
+		# enable epel-testing, as long as Mono 6.6 is not in Epel yet (April/May 2020)
+		yum-config-manager --enable epel-testing
+	fi
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
-		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos7.x86_64.rpm"
+		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos$VER.x86_64.rpm"
 		yum -y install $url || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
@@ -330,8 +336,8 @@ install_centos()
 		yum -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
 			# phpmyadmin
-			if [[ "`rpm -qa | grep remi-release-7`" = "" ]]; then
-				yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm || exit -1
+			if [[ "`rpm -qa | grep remi-release-$VER`" = "" ]]; then
+				yum -y install http://rpms.remirepo.net/enterprise/remi-release-$VER.rpm || exit -1
 			fi
 			yum-config-manager --enable remi-php71
 			yum-config-manager --enable remi
@@ -626,7 +632,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "31" ]]; then
+			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "31" && "$VER" != "32" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
