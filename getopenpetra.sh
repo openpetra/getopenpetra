@@ -56,7 +56,7 @@ export OPENPETRA_DBNAME=openpetra
 export OPENPETRA_DBUSER=openpetra
 export OPENPETRA_DBPWD=TO_BE_SET
 export OPENPETRA_RDBMSType=mysql
-export OPENPETRA_DBHOST=localhost
+export OPENPETRA_DBHOST=127.0.0.1
 export OPENPETRA_DBPORT=3306
 export OPENPETRA_HTTP_PORT=80
 export OPENPETRA_USER=openpetra
@@ -682,8 +682,6 @@ install_openpetra()
 				mkdir -p $SRC_PATH
 				cp -R /home/appveyor/projects/openpetra/* $SRC_PATH
 			fi
-			# avoid error: Unable to connect to any of the specified MySQL hosts. MySQL Error Number: 1042
-			OPENPETRA_DBHOST=127.0.0.1
 		fi
 
 		if [ ! -d $SRC_PATH ]
