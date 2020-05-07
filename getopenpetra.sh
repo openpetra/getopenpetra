@@ -339,8 +339,8 @@ install_centos()
 			if [[ "`rpm -qa | grep remi-release-$VER`" = "" ]]; then
 				yum -y install http://rpms.remirepo.net/enterprise/remi-release-$VER.rpm || exit -1
 			fi
-			yum-config-manager --enable remi-php71
 			yum-config-manager --enable remi
+			yum-config-manager --enable remi-php74 || dnf -y module enable php:remi-7.4
 			yum -y install phpMyAdmin php-fpm || exit -1
 			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
