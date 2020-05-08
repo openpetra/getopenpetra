@@ -568,6 +568,7 @@ install_openpetra()
 
 	if [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		OPENPETRA_DBPORT=5432
+		OPENPETRA_DBHOST=localhost
 	fi
 
 	# Valid install type is required
