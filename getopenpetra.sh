@@ -306,7 +306,7 @@ install_centos()
 	fi
 	if [[ "$VER" == "8" ]]; then
 		# enable epel-testing, as long as Mono 6.6 is not in Epel yet (April/May 2020)
-		yum-config-manager --enable epel-testing
+		# yum-config-manager --enable epel-testing
 	fi
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
