@@ -69,6 +69,7 @@ export OPENPETRA_EMAILDOMAIN=myexample.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
+export MONO_EPEL7=mono-6.6
 
 nginx_conf()
 {
@@ -302,7 +303,7 @@ install_centos()
 	yum -y install $packagesToInstall || exit -1
 	if [[ "$VER" == "7" ]]; then
 		# install Copr repository for Mono >= 5.10
-		su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/mono-5.18/repo/epel-7/tpokorra-mono-5.18-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono5.repo'
+		su -c 'curl https://copr.fedorainfracloud.org/coprs/tpokorra/$MONO_EPEL7/repo/epel-7/tpokorra-mono-$MONO_EPEL7-epel-7.repo | tee /etc/yum.repos.d/tpokorra-mono.repo'
 	fi
 	#if [[ "$VER" == "8" ]]; then
 	#	# enable epel-testing, as long as Mono 6.6 is not in Epel yet (April/May 2020)
