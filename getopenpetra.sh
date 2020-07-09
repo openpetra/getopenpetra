@@ -874,6 +874,7 @@ install_openpetra()
 		export TEMPLATES_PATH=$SRC_PATH/templates
 		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
 		export OLDVERSION="2020.04.0-3"
+		export TagDemoDB="UsedForNUnitTests-201907"
 
 		# setup the repository for the openpetranow-mysql-test rpm file
 		# see https://lbs.solidcharity.com/package/solidcharity/openpetra/openpetranow-mysql-test
@@ -897,7 +898,7 @@ install_openpetra()
 
 		# download and restore demo database
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
-		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
+		curl --silent --location https://github.com/openpetra/demo-databases/raw/$TagDemoDB/demoWith1ledger.yml.gz > $demodbfile
 		$OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
 		chmod a+w /home/$OP_CUSTOMER/log/Server.log
