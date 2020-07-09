@@ -874,7 +874,7 @@ install_openpetra()
 		export TEMPLATES_PATH=$SRC_PATH/templates
 		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
 		export OLDVERSION="2020.04.0-3"
-		export TagDemoDB="UsedForNUnitTests-201907"
+		export TagDemoDB="UsedForNUnitTests-202004"
 
 		# setup the repository for the openpetranow-mysql-test rpm file
 		# see https://lbs.solidcharity.com/package/solidcharity/openpetra/openpetranow-mysql-test
