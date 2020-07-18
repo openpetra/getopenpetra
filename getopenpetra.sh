@@ -69,7 +69,7 @@ export OPENPETRA_EMAILDOMAIN=myexample.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
-export MONO_EPEL7=mono-5.18
+export MONO_EPEL7=mono-6.8
 
 nginx_conf()
 {
