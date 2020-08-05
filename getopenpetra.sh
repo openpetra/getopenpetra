@@ -300,10 +300,6 @@ install_centos()
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 	yum -y install $packagesToInstall || exit -1
-	#if [[ "$VER" == "8" ]]; then
-	#	# enable epel-testing, as long as Mono 6.6 is not in Epel yet (April/May 2020)
-	#	yum-config-manager --enable epel-testing
-	#fi
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
 		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos$VER.x86_64.rpm"
