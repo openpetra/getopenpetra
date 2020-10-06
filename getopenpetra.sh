@@ -656,6 +656,7 @@ install_openpetra()
 		if [ -z $MYSQL_ROOT_PWD ]; then
 			export MYSQL_ROOT_PWD=`generatepwd`
 			echo "generated mysql root password: $MYSQL_ROOT_PWD"
+			systemctl start mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
 		fi
 	fi
