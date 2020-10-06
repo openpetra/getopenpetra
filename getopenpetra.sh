@@ -563,14 +563,6 @@ install_openpetra()
 		OPENPETRA_DBHOST=localhost
 	fi
 
-	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		if [ -z $MYSQL_ROOT_PWD ]; then
-			export MYSQL_ROOT_PWD=`generatepwd`
-			echo "generated mysql root password: $MYSQL_ROOT_PWD"
-			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
-		fi
-	fi
-
 	# Valid install type is required
 	if [[ "$install_type" != "devenv" && "$install_type" != "test" && "$install_type" != "prod" && "$install_type" != "demo" && "$install_type" != "old" ]]; then
 		echo "You must specify the install type:"
@@ -658,6 +650,14 @@ install_openpetra()
 		install_debian
 	elif [[ "$OS" == "Ubuntu" ]]; then
 		install_ubuntu
+	fi
+
+	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
+		if [ -z $MYSQL_ROOT_PWD ]; then
+			export MYSQL_ROOT_PWD=`generatepwd`
+			echo "generated mysql root password: $MYSQL_ROOT_PWD"
+			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
+		fi
 	fi
 
 	#####################################
