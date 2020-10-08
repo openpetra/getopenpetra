@@ -532,7 +532,7 @@ install_openpetra()
 	trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' ERR
 	install_type="$1"
 
-	export OPENPETRA_DBPWD=`generatepwd`
+	export OPENPETRA_DBPWD="`generatepwd`"
 
 	while [ $# -gt 0 ]; do
 		case "$1" in
@@ -654,7 +654,7 @@ install_openpetra()
 
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		if [ -z $MYSQL_ROOT_PWD ]; then
-			export MYSQL_ROOT_PWD=`generatepwd`
+			export MYSQL_ROOT_PWD="`generatepwd`"
 			echo "generated mysql root password: $MYSQL_ROOT_PWD"
 			systemctl start mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
@@ -706,7 +706,8 @@ install_openpetra()
 
 		# configure database
 		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
-		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN initdb || exit -1
+		echo "MYSQL_ROOT_PWD: $MYSQL_ROOT_PWD"
+		OP_CUSTOMER=$OPENPETRA_USER MYSQL_ROOT_PWD="$MYSQL_ROOT_PWD" $OPENPETRA_SERVER_BIN initdb || exit -1
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
 
 		su $OPENPETRA_USER -c "nant generateSolution" || exit -1
