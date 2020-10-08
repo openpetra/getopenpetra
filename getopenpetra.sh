@@ -657,6 +657,7 @@ install_openpetra()
 			export MYSQL_ROOT_PWD="`generatepwd`"
 			echo "generated mysql root password: $MYSQL_ROOT_PWD"
 			systemctl start mariadb
+			systemctl enable mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
 		fi
 	fi
@@ -706,7 +707,6 @@ install_openpetra()
 
 		# configure database
 		su $OPENPETRA_USER -c "nant generateTools createSQLStatements" || exit -1
-		echo "MYSQL_ROOT_PWD: $MYSQL_ROOT_PWD"
 		OP_CUSTOMER=$OPENPETRA_USER MYSQL_ROOT_PWD="$MYSQL_ROOT_PWD" $OPENPETRA_SERVER_BIN initdb || exit -1
 		su $OPENPETRA_USER -c "nant recreateDatabase resetDatabase" || exit -1
 
