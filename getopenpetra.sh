@@ -495,8 +495,11 @@ install_ubuntu()
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
 			if [[ "$VER" == "18.04" ]]; then
 				curl --silent --location https://deb.nodesource.com/setup_10.x  | bash -
+				# this will install npm as well
+                                apt-get -y install nodejs || exit -1
+			else
+				apt-get -y install nodejs npm || exit -1
 			fi
-			apt-get -y install nodejs npm || exit -1
 		fi
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	else
