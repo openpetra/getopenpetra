@@ -493,7 +493,7 @@ install_ubuntu()
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
-			if [[ "$VER" == "bionic" ]]; then
+			if [[ "$VER" == "18.04" ]]; then
 				curl --silent --location https://deb.nodesource.com/setup_10.x  | bash -
 			fi
 			apt-get -y install nodejs npm || exit -1
