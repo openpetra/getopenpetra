@@ -660,6 +660,7 @@ install_openpetra()
 			systemctl enable mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
 			systemctl restart mariadb
+                        echo "show databases" | mysql -u root --password="$MYSQL_ROOT_PWD" || exit 1
 		fi
 	fi
 
