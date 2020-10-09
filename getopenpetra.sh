@@ -660,7 +660,7 @@ install_openpetra()
 			systemctl enable mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
 			systemctl restart mariadb
-                        echo "show databases" | mysql -u root --host=127.0.0.1 --port=3306 --password="$MYSQL_ROOT_PWD" || exit 1
+                        echo "show databases" | mysql -u root --password="$MYSQL_ROOT_PWD" || exit 1
 		fi
 	fi
 
