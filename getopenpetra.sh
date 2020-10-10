@@ -43,7 +43,7 @@
 #
 # Then you can request a commercially-licensed download:
 #
-#	$ curl https://getopenpetra.com | bash -s prod
+#	$ curl https://get.openpetra.org | bash -s prod
 #
 # This should work on CentOS 7 and 8, Fedora 31 and 32
 # and Ubuntu 20.04 (Focal Fossa), Ubuntu 19.10 (Eoan Ermine), Ubuntu 18.04 (Bionic Beaver)
