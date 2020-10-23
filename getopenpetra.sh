@@ -334,7 +334,6 @@ install_centos()
 			yum-config-manager --enable remi
 			yum-config-manager --enable remi-php74 || dnf -y module enable php:remi-7.4
 			sleep 10 # avoid OSError: [Errno 1] Operation not permitted: '/var/cache/yum/x86_64/7/remi-php74/gen/primary_db.sqlite'
-                        ls -la /var/cache/yum/x86_64/7/remi-php74/gen/primary_db.sqlite
 			yum -y install phpMyAdmin php-fpm || exit -1
 			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
 			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
