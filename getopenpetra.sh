@@ -632,7 +632,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "31" && "$VER" != "32" ]]; then
+			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "32" && "$VER" != "33" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
