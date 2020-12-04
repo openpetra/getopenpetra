@@ -667,10 +667,6 @@ install_openpetra()
 			systemctl enable mariadb
 			mysqladmin -u root password "$MYSQL_ROOT_PWD" || exit 1
 			systemctl restart mariadb
-			if [[ "$APPVEYOR_MYSQL" != "" ]]; then
-				# for MySQL 8 on Appveyor we need to allow loading from local files
-				echo "SET GLOBAL local_infile=1" | mysql -u root --password="$MYSQL_ROOT_PWD" || exit 1
-			fi
 		fi
 	fi
 
