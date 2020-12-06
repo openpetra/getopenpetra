@@ -124,8 +124,6 @@ openpetra_conf()
 			chmod a+r -R $OPENPETRA_HOME
 			find $OPENPETRA_HOME -type d -print0 | xargs -0 chmod a+x
 			rm -f $OPENPETRA_HOME/server/bin/Mono.Security.dll
-			rm -f $OPENPETRA_HOME/server/bin/Mono.Data.Sqlite.dll
-			rm -f $OPENPETRA_HOME/server/bin/sqlite3.dll
 			rm -f $OPENPETRA_HOME/server/bin/libsodium.dll
 			rm -f $OPENPETRA_HOME/server/bin/libsodium-64.dll
 
