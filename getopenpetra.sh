@@ -460,6 +460,9 @@ install_ubuntu()
 		cat /etc/apt/sources.list | grep mono > /etc/apt/sources.list.d/mono.list
 		sed -i  "/mono/s/^/#/" /etc/apt/sources.list
 		apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+
+		# For Mono 6.12, loading the libsodium.so file does not work as expected.
+		sed -i 's#</configuration>#        <dllmap dll="libsodium" target="/usr/lib/x86_64-linux-gnu/libsodium.so.23" os="!windows"/>\n</configuration>#g' /etc/mono/config
 	fi
 
 	apt-get -y install $packagesToInstall || exit -1
