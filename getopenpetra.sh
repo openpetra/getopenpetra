@@ -503,7 +503,12 @@ install_ubuntu()
 				apt-get -y install nodejs npm || exit -1
 			fi
 		fi
-		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
+		if [[ ! -z $APPVEYOR_MONO ]]; then
+			# Appveyor: there is some issue with mono-fastcgi-server4, and we don't need that on Appveyor
+			apt-get -y install nant mono-devel mono-xsp4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
+		else
+			apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
+		fi
 	else
 		apt-get -y install mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
 	fi
