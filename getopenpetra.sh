@@ -536,7 +536,7 @@ install_ubuntu()
 			#systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		apt-get -y install postgresql-server || exit -1
+		apt-get -y install postgresql || exit -1
 	fi
 }
 
@@ -584,6 +584,15 @@ install_openpetra()
 		echo "  demo: install a demo server with OpenPetra (only supported on CentOS)"
 		echo "  prod: install a production server with OpenPetra"
 		return 9
+	fi
+	
+	# Valid database type is required
+	if [[ "$OPENPETRA_RDBMSType" != "mysql" && "$OPENPETRA_RDBMSType" != "postgresql" ]]; then
+		echo "You must specify the correct database type:"
+		echo "  dbms: select a database type for OpenPetra"
+		echo "  mysql: set up a mysql database (default)"
+		echo "  postgresql: set up a postgresql database"
+		return 11
 	fi
 
 	# just for documentation
