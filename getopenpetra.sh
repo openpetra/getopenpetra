@@ -897,7 +897,9 @@ install_openpetra()
 		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
 		export TEMPLATES_PATH=$SRC_PATH/templates
 		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
-		export OLDVERSION="2020.04.0-3"
+		if [ -z $OLDVERSION ]; then
+			export OLDVERSION="2020.12.0-3"
+		fi
 		export TagDemoDB="UsedForNUnitTests-202004"
 
 		# setup the repository for the openpetranow-mysql-test rpm file
