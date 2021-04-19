@@ -246,7 +246,7 @@ openpetra_conf_devenv()
 
 install_fedora()
 {
-	packagesToInstall="sudo"
+	packagesToInstall="sudo curl wget"
 	if [[ "$install_type" == "devenv" ]]; then
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
@@ -291,7 +291,7 @@ install_fedora()
 
 install_centos()
 {
-	packagesToInstall="epel-release yum-utils sudo"
+	packagesToInstall="epel-release yum-utils sudo curl wget"
 	if [[ "$install_type" == "devenv" ]]; then
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
@@ -348,7 +348,7 @@ install_centos()
 
 install_debian()
 {
-	packagesToInstall="sudo"
+	packagesToInstall="sudo curl wget"
 	if [[ "$install_type" == "devenv" ]]; then
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
@@ -440,7 +440,7 @@ install_debian()
 
 install_ubuntu()
 {
-	packagesToInstall="sudo"
+	packagesToInstall="sudo curl wget"
 	if [[ "$install_type" == "devenv" ]]; then
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
