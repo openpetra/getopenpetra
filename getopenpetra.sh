@@ -270,7 +270,7 @@ install_fedora()
 		# for mono runtime
 		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
-	dnf -y install nginx lsb libsodium || exit -1
+	dnf -y install nginx lsb libsodium libsodium-static || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		dnf -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
