@@ -7,6 +7,8 @@
 #   Requires: bash, curl, sudo (if not root), tar
 #
 # This script installs OpenPetra on your Linux system.
+# Please only run this script on a clean system, since it might destroy
+# other applications already running on this server.
 # You have various options, to install a development environment, or to 
 # install a test environment, or to install a production environment.
 #
@@ -575,9 +577,27 @@ install_openpetra()
 			--instance=*)
 				export OP_CUSTOMER="${1#*=}"
 				;;
+			--iknowwhatiamdoing=*)
+				export IKNOWWHATIAMDOING="${1#*=}"
+				;;
 		esac
 		shift
 	done
+
+	# prevent accidents from happening
+	if [[ "$IKNOWWHATIAMDOING" != "yes" ]]; then
+		echo "This script might destroy other applications on this container or VM or server."
+		echo "Please only run this script if you understand what it does."
+		echo "You can cancel by pressing ENTER"
+		echo "To continue with this script, type 'yes' followed by ENTER"
+		read IKNOWWHATIAMDOING
+	fi
+	if [[ "$IKNOWWHATIAMDOING" != "yes" ]]; then
+		echo
+		echo "This script was not executed."
+	        echo "To get the benefits of a secure and stable installation, you are welcome to get a free instance at https://www.openpetra.com"
+		return 9
+	fi
 
 	if [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		OPENPETRA_DBPORT=5432
@@ -886,6 +906,14 @@ install_openpetra()
 
 		echo "Go and check your instance at $OPENPETRA_URL"
 		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
+	fi
+
+	##############################
+	# Setup the prod environment #
+	##############################
+	if [[ "$install_type" == "prod" ]]; then
+		echo "Production on-site installation is not available yet. Please contact us for details."
+		return 6
 	fi
 
 	##############################
