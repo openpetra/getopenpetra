@@ -49,7 +49,7 @@
 #
 # This should work on CentOS 7 and 8, Fedora 33 and 34
 # and Ubuntu 20.04 (Focal Fossa), Ubuntu 18.04 (Bionic Beaver)
-# and Debian 10 (Buster).
+# and Debian 10 (Buster) & Debian 11 (Bullseye).
 # Please open an issue if you notice any bugs.
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
@@ -397,6 +397,12 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update
 		fi
+		if [[ "$VER" == "11" ]]; then
+			# for nant
+			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/bullseye bullseye main' >> /etc/apt/sources.list
+			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+			apt-get update
+		fi
 	fi
 	# For Debian Stretch, get Mono packages compiled by SolidCharity.com, because Debian Stretch only has Mono 4.6
 	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
@@ -683,7 +689,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != "10" && "$VER" != "18.04" && "$VER" != "20.04" ]]; then
+			if [[ "$VER" != 11 && "$VER" != "10" && "$VER" != "18.04" && "$VER" != "20.04" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
