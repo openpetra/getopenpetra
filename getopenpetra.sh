@@ -178,10 +178,10 @@ openpetra_conf_devenv()
 {
 	# copy web.config for easier debugging
 	mkdir -p $SRC_PATH/delivery
-	cp $SRC_PATH/setup/petra0300/linuxserver/web.config $SRC_PATH/delivery/web.config
+	cp $SRC_PATH/setup/linuxserver/web.config $SRC_PATH/delivery/web.config
 
 	# create OpenPetra.build.config
-	cat $SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/OpenPetra.build.config \
+	cat $SRC_PATH/setup/linuxserver/$OPENPETRA_RDBMSType/OpenPetra.build.config \
 		| sed -e "s/OPENPETRA_RDBMSType/$OPENPETRA_RDBMSType/g" \
 		| sed -e "s/OPENPETRA_DBNAME/$OPENPETRA_DBNAME/g" \
 		| sed -e "s/OPENPETRA_DBUSER/$OPENPETRA_DBUSER/g" \
@@ -227,7 +227,7 @@ openpetra_conf_devenv()
 	if [ "$SRC_PATH" = "$OPENPETRA_HOME/openpetra" ]; then
 		MY_SRC_PATH=openpetra
 	fi
-	ln -s $MY_SRC_PATH/setup/petra0300/linuxserver/openpetra-server.sh $OPENPETRA_SERVER_BIN
+	ln -s $MY_SRC_PATH/setup/linuxserver/openpetra-server.sh $OPENPETRA_SERVER_BIN
 	chmod a+x $OPENPETRA_SERVER_BIN
 	ln -s $MY_SRC_PATH/delivery $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH/delivery/db $OPENPETRA_HOME/db
@@ -239,9 +239,9 @@ openpetra_conf_devenv()
 	ln -s $MY_SRC_PATH_SERVER/delivery $SRC_PATH/delivery/api
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.asmx $OPENPETRA_HOME/server
 	ln -s $MY_SRC_PATH_SERVER/csharp/ICT/Petra/Server/app/WebService/*.aspx $OPENPETRA_HOME/server
-	ln -s $MY_SRC_PATH_SERVER/setup/petra0300/linuxserver $OPENPETRA_HOME/templates
+	ln -s $MY_SRC_PATH_SERVER/setup/linuxserver $OPENPETRA_HOME/templates
 	cd -
-	cd $SRC_PATH/js-client && ln -s ../setup/petra0300/releasenotes/ && cd -
+	cd $SRC_PATH/js-client && ln -s ../setup/releasenotes/ && cd -
 	mkdir -p $OPENPETRA_HOME/openpetra/delivery/bin
 	cd $OPENPETRA_HOME/server/bin && ln -s ../../db/version.txt && cd -
 }
@@ -738,9 +738,9 @@ install_openpetra()
 		export OPENPETRA_HOME=/home/$OPENPETRA_USER
 		export SRC_PATH=$OPENPETRA_HOME/openpetra
 		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		export OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/petra0300/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
-		export NGINX_TEMPLATE_FILE=$SRC_PATH/setup/petra0300/linuxserver/nginx.conf
-		export TEMPLATES_PATH=$SRC_PATH/setup/petra0300/linuxserver
+		export OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
+		export NGINX_TEMPLATE_FILE=$SRC_PATH/setup/linuxserver/nginx.conf
+		export TEMPLATES_PATH=$SRC_PATH/setup/linuxserver
 
 		if [ ! -z "$APPVEYOR" ]; then
 			if [ -d /home/appveyor/projects/openpetra ]; then
