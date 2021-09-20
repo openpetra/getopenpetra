@@ -381,8 +381,8 @@ install_debian()
 
 		curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
 
-		# for building the js client
-		apt-get -y install nodejs npm || exit -1
+		# for building the js client; will install npm as well
+		apt-get -y install nodejs || exit -1
 		# for mono development
 		if [[ "$VER" == "9" ]]; then
 			# for nant
