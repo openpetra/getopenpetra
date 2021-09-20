@@ -71,6 +71,7 @@ export OPENPETRA_EMAILDOMAIN=myexample.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
+export NODE_VERSION=14
 
 nginx_conf()
 {
@@ -313,7 +314,7 @@ install_centos()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		curl --silent --location https://rpm.nodesource.com/setup_10.x  | bash -
+		curl --silent --location https://rpm.nodesource.com/setup_$NODE_VERSION.x  | bash -
 		yum -y install nodejs || exit -1
 		# for mono development
 		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
@@ -379,7 +380,7 @@ install_debian()
 	if [[ "$install_type" == "devenv" ]]; then
 
 		if [[ "$VER" == "9" ]]; then
-			curl --silent --location https://deb.nodesource.com/setup_10.x  | bash -
+			curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
 		fi
 
 		# for building the js client
@@ -512,7 +513,7 @@ install_ubuntu()
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
 			if [[ "$VER" == "18.04" ]]; then
-				curl --silent --location https://deb.nodesource.com/setup_10.x  | bash -
+				curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
 				# this will install npm as well
                                 apt-get -y install nodejs || exit -1
 			else
