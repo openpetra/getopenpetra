@@ -783,9 +783,10 @@ install_openpetra()
 		su $OPENPETRA_USER -c "git config --global push.default simple"
 
 		# for the cypress test environment
-		if [[ -z $APPVEYOR_MONO ]]; then
-			su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress@4.3.0 --save --save-exact --quiet" || exit -1
-		fi
+		# TODO: latest version of cypress (5.x) already installed with nant install.js
+		#if [[ -z $APPVEYOR_MONO ]]; then
+		#	su $OPENPETRA_USER -c "cd js-client && CI=1 npm install cypress@4.3.0 --save --save-exact --quiet" || exit -1
+		#fi
 
 		# download and restore demo database
 		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
