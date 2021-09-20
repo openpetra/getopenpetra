@@ -379,9 +379,7 @@ install_debian()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 
-		if [[ "$VER" == "9" ]]; then
-			curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
-		fi
+		curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
 
 		# for building the js client
 		apt-get -y install nodejs npm || exit -1
@@ -512,13 +510,9 @@ install_ubuntu()
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
-			if [[ "$VER" == "18.04" ]]; then
-				curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
-				# this will install npm as well
-                                apt-get -y install nodejs || exit -1
-			else
-				apt-get -y install nodejs npm || exit -1
-			fi
+			curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
+			# this will install npm as well
+			apt-get -y install nodejs || exit -1
 		fi
 		if [[ ! -z $APPVEYOR_MONO ]]; then
 			# Appveyor: there is some issue with mono-fastcgi-server4, and we don't need that on Appveyor
