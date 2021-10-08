@@ -493,7 +493,7 @@ install_ubuntu()
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb gconf2 libgdk-pixbuf2.0-0 libqt5gui5 || exit -1
+		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb gconf2 libgdk-pixbuf2.0-0 libqt5gui5 libegl1 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
