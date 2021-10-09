@@ -531,8 +531,11 @@ install_ubuntu()
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
-	# update the certificates for Mono
-	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
+	if [[ ! -z $APPVEYOR_MONO ]]; then
+		# on Appveyor: update the certificates for Mono
+		rm -Rf /usr/share/.mono/
+		curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
+	fi
 	apt-get -y install libsodium23 lsb || exit -1
 	apt-get -y install nginx || exit -1
 
