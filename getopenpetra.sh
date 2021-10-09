@@ -273,6 +273,8 @@ install_fedora()
 		# for mono runtime
 		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
+	# update the certificates for Mono
+	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	dnf -y install nginx lsb libsodium libsodium-static || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		dnf -y install mariadb-server || exit -1
@@ -323,7 +325,7 @@ install_centos()
 		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
 	# update the certificates for Mono
-	curl https://curl.haxx.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
+	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	yum -y install nginx lsb libsodium || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		yum -y install mariadb-server || exit -1
@@ -428,6 +430,8 @@ install_debian()
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
+	# update the certificates for Mono
+	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	apt-get -y install nginx || exit -1
 	if [[ "$VER" == "9" ]]; then
 		apt-get -y install libsodium18 || exit -1
@@ -527,6 +531,8 @@ install_ubuntu()
 	if [ -f /usr/lib/mono/4.5-api/System.dll -a -f /usr/lib/mono/4.5/System.dll ]; then
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
+	# update the certificates for Mono
+	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	apt-get -y install libsodium23 lsb || exit -1
 	apt-get -y install nginx || exit -1
 
