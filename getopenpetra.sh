@@ -325,6 +325,7 @@ install_centos()
 		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
 	# update the certificates for Mono
+	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	yum -y install nginx lsb libsodium || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
@@ -431,6 +432,7 @@ install_debian()
 		rm -f /usr/lib/mono/4.5-api/System.dll
 	fi
 	# update the certificates for Mono
+	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	apt-get -y install nginx || exit -1
 	if [[ "$VER" == "9" ]]; then
