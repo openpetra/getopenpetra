@@ -18,7 +18,7 @@
 #
 # The syntax is:
 #
-#	bash -s [devenv|test|demo|prod]
+#	bash -s [devenv|test|prod]
 #
 # available options:
 #     --git_url=<http git url>
@@ -862,132 +862,11 @@ install_openpetra()
 	fi
 
 	##############################
-	# Setup the demo environment #
-	##############################
-	if [[ "$install_type" == "demo" ]]; then
-
-		if [[ "$OS" != "CentOS" ]]; then
-			echo "Aborted, Your distro is not supported for demo installation: " $OS
-			return 6
-		fi
-
-		if [ -z $OP_CUSTOMER ]; then
-			export OP_CUSTOMER=op_demo
-		fi
-		export OPENPETRA_DBNAME=$OP_CUSTOMER
-		export OPENPETRA_DBUSER=$OP_CUSTOMER
-		export OPENPETRA_USER=openpetra
-		export OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
-		export OPENPETRA_HOME=/home/$OPENPETRA_USER
-		export SRC_PATH=/home/$OPENPETRA_USER
-		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		export TEMPLATES_PATH=$SRC_PATH/templates
-		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
-
-		# setup the repository for the openpetranow-mysql-test rpm file
-		# see https://lbs.solidcharity.com/package/solidcharity/openpetra/openpetranow-mysql-test
-		cd /etc/yum.repos.d
-		repourl=https://lbs.solidcharity.com/repos/solidcharity/openpetra/centos/7/lbs-solidcharity-openpetra.repo
-		repofile=`basename $repourl`
-		if [ ! -f $repofile ]
-		then
-		  curl -L $repourl -o $repofile
-		fi
-		sed -i "s/^enabled.*/enabled = 0/g" $repofile
-		cd -
-
-		yum -y install --enablerepo="lbs-solidcharity-openpetra" openpetranow-mysql-test || exit -1
-
-		# configure nginx
-		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
-
-		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
-		$OPENPETRA_SERVER_BIN initdb || exit -1
-
-		# download and restore demo database
-		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
-		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
-		$OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
-
-		chmod a+w /home/$OP_CUSTOMER/log/Server.log
-
-		# setup restore of demo database each night
-		crontab -l | { cat; echo "55 0 * * * OP_CUSTOMER=$OP_CUSTOMER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile"; } | crontab -
-
-		systemctl restart openpetra
-		systemctl restart nginx
-
-		echo "Go and check your instance at $OPENPETRA_URL"
-		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
-	fi
-
-	##############################
 	# Setup the prod environment #
 	##############################
 	if [[ "$install_type" == "prod" ]]; then
 		echo "Production on-site installation is not available yet. Please contact us for details."
 		return 6
-	fi
-
-	##############################
-	# Setup the previous version #
-	##############################
-	if [[ "$install_type" == "old" ]]; then
-
-		if [[ "$OS" != "CentOS" ]]; then
-			echo "Aborted, Your distro is not supported for old installation: " $OS
-			return 6
-		fi
-
-		if [ -z $OP_CUSTOMER ]; then
-			export OP_CUSTOMER=op_test
-		fi
-		export OPENPETRA_DBNAME=$OP_CUSTOMER
-		export OPENPETRA_DBUSER=$OP_CUSTOMER
-		export OPENPETRA_USER=openpetra
-		export OPENPETRA_SERVERNAME=$OP_CUSTOMER.localhost
-		export OPENPETRA_HOME=/home/$OPENPETRA_USER
-		export SRC_PATH=/home/$OPENPETRA_USER
-		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		export TEMPLATES_PATH=$SRC_PATH/templates
-		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
-		if [ -z $OLDVERSION ]; then
-			export OLDVERSION="2020.12.0-3"
-		fi
-		export TagDemoDB="UsedForNUnitTests-202004"
-
-		# setup the repository for the openpetranow-mysql-test rpm file
-		# see https://lbs.solidcharity.com/package/solidcharity/openpetra/openpetranow-mysql-test
-		cd /etc/yum.repos.d
-		repourl=https://lbs.solidcharity.com/repos/solidcharity/openpetra/centos/7/lbs-solidcharity-openpetra.repo
-		repofile=`basename $repourl`
-		if [ ! -f $repofile ]
-		then
-		  curl -L $repourl -o $repofile
-		fi
-		sed -i "s/^enabled.*/enabled = 0/g" $repofile
-		cd -
-
-		yum -y install --enablerepo="lbs-solidcharity-openpetra" openpetranow-mysql-test-$OLDVERSION.x86_64 || exit -1
-
-		# configure nginx
-		nginx_conf /etc/nginx/conf.d/$OP_CUSTOMER.conf
-
-		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
-		$OPENPETRA_SERVER_BIN initdb || exit -1
-
-		# download and restore demo database
-		demodbfile=$OPENPETRA_HOME/demoWith1ledger.yml.gz
-		curl --silent --location https://github.com/openpetra/demo-databases/raw/$TagDemoDB/demoWith1ledger.yml.gz > $demodbfile
-		$OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
-
-		chmod a+w /home/$OP_CUSTOMER/log/Server.log
-
-		systemctl restart openpetra
-		systemctl restart nginx
-
-		echo "Go and check your instance at $OPENPETRA_URL"
-		echo "login with user DEMO and password demo, or user SYSADMIN and password CHANGEME."
 	fi
 }
 
