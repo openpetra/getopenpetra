@@ -274,6 +274,7 @@ install_fedora()
 		dnf -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	fi
 	# update the certificates for Mono
+	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	dnf -y install nginx lsb libsodium libsodium-static || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
