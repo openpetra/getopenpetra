@@ -456,7 +456,7 @@ install_debian()
 			#systemctl start php-fpm
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		apt-get -y install postgresql-server || exit -1
+		apt-get -y install postgresql || exit -1
 	fi
 }
 
