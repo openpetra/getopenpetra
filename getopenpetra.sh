@@ -310,7 +310,8 @@ install_centos()
 		yum -y install epel-release || exit -1
 	fi
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
-	yum -y copr enable tpokorra/openpetra_env || exit -1
+	#yum -y copr enable tpokorra/openpetra_env || exit -1
+	curl -L https://copr.fedorainfracloud.org/coprs/tpokorra/openpetra_env/repo/epel-$VER/tpokorra-openpetra_env-epel-$VER.repo > /etc/yum.repos.d/openpetra_env.repo || exit -1
 	# for printing reports to pdf
 	yum -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
