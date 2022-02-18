@@ -297,13 +297,18 @@ install_fedora()
 
 install_centos()
 {
-	packagesToInstall="epel-release yum-utils sudo curl wget"
+	packagesToInstall="yum-utils sudo curl wget"
 	if [[ "$install_type" == "devenv" ]]; then
 		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
 	yum -y install $packagesToInstall || exit -1
+	if [[ "$VER" == "9" ]]; then
+		yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+	else
+		yum -y install epel-release || exit -1
+	fi
 	# for printing reports to pdf
 	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
 		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos$VER.x86_64.rpm"
