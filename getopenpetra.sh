@@ -47,7 +47,7 @@
 #
 #	$ curl https://get.openpetra.org | bash -s prod
 #
-# This should work on CentOS 7 and 8, Fedora 34 and 35
+# This should work on CentOS 7 and 8 and 9, Fedora 34 and 35
 # and Ubuntu 20.04 (Focal Fossa), Ubuntu 18.04 (Bionic Beaver)
 # and Debian 10 (Buster) & Debian 11 (Bullseye).
 # Please open an issue if you notice any bugs.
@@ -689,7 +689,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "34" && "$VER" != "35" ]]; then
+			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9" && "$VER" != "34" && "$VER" != "35" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
