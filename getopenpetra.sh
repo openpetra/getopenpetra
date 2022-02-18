@@ -309,11 +309,10 @@ install_centos()
 	else
 		yum -y install epel-release || exit -1
 	fi
+	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
+	yum copr enable tpokorra/openpetra_env || exit -1
 	# for printing reports to pdf
-	if [[ "`rpm -qa | grep wkhtmltox`" == "" ]]; then
-		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox-0.12.5-1.centos$VER.x86_64.rpm"
-		yum -y install $url || exit -1
-	fi
+	yum -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
 		yum -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss libXScrnSaver alsa-lib || exit -1
