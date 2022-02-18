@@ -305,7 +305,7 @@ install_centos()
 	fi
 	yum -y install $packagesToInstall || exit -1
 	if [[ "$VER" == "9" ]]; then
-		yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+		yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm || exit -1
 	else
 		yum -y install epel-release || exit -1
 	fi
