@@ -276,7 +276,7 @@ install_fedora()
 	# update the certificates for Mono
 	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-	dnf -y install nginx redhat-lsb libsodium libsodium-static || exit -1
+	dnf -y install nginx libsodium libsodium-static || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		dnf -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
@@ -336,7 +336,7 @@ install_centos()
 	# update the certificates for Mono
 	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-	yum -y install nginx redhat-lsb libsodium || exit -1
+	yum -y install nginx libsodium || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		yum -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
