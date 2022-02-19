@@ -22,6 +22,7 @@ The syntax is:
 	bash -s [devenv|test|prod]
 
 available options:
+
      --git_url=<http git url>
             default is: --git_url=https://github.com/openpetra/openpetra.git
      --branch=<branchname>
