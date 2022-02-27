@@ -255,6 +255,9 @@ install_fedora()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
+	if [[ "$install_type" == "test" || "$install_type" == "demo" ]]; then
+		packagesToInstall=$packagesToInstall" crontabs"
+	fi
 	dnf -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
 	dnf -y install wkhtmltopdf || exit -1
