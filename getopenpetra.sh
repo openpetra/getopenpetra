@@ -47,7 +47,7 @@
 #
 #	$ curl https://get.openpetra.org | bash -s prod
 #
-# This should work on CentOS 7 and 8 and 9, Fedora 34 and 35
+# This should work on CentOS 7 and 8, Fedora 34 and 35
 # and Ubuntu 20.04 (Focal Fossa), Ubuntu 18.04 (Bionic Beaver)
 # and Debian 10 (Buster) & Debian 11 (Bullseye).
 # Please open an issue if you notice any bugs.
@@ -306,12 +306,9 @@ install_centos()
 		# need git for devenv
 		packagesToInstall=$packagesToInstall" git unzip"
 	fi
+
 	yum -y install $packagesToInstall || exit -1
-	if [[ "$VER" == "9" ]]; then
-		yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm || exit -1
-	else
-		yum -y install epel-release || exit -1
-	fi
+	yum -y install epel-release || exit -1
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
 	# there is a temporary issue (for 6 days with a wrong repo without epel in my copr)
 	#yum -y copr enable tpokorra/openpetra_env || exit -1
@@ -700,7 +697,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9" && "$VER" != "34" && "$VER" != "35" ]]; then
+			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9TODO" && "$VER" != "34" && "$VER" != "35" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
