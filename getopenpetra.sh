@@ -310,9 +310,7 @@ install_centos()
 	yum -y install $packagesToInstall || exit -1
 	yum -y install epel-release || exit -1
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
-	# there is a temporary issue (for 6 days with a wrong repo without epel in my copr)
-	#yum -y copr enable tpokorra/openpetra_env || exit -1
-	curl -L https://copr.fedorainfracloud.org/coprs/tpokorra/openpetra_env/repo/epel-$VER/tpokorra-openpetra_env-epel-$VER.repo > /etc/yum.repos.d/openpetra_env.repo || exit -1
+	yum -y copr enable tpokorra/openpetra_env || exit -1
 	# GConf2 is currently only in epel9 testing
 	yum-config-manager --enable epel-testing
 	# for printing reports to pdf
@@ -358,6 +356,12 @@ install_centos()
 		fi
 	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
 		yum -y install postgresql-server || exit -1
+	fi
+
+	# CentOS 9: For Mono 6.12, loading the libsodium.so file does not work as expected.
+	if [ -f /usr/lib64/libsodium.so.23 ]
+	then
+		sed -i 's#</configuration>#        <dllmap dll="libsodium" target="/usr/lib64/libsodium.so.23" os="!windows"/>\n</configuration>#g' /etc/mono/config
 	fi
 }
 
