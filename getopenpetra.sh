@@ -308,7 +308,7 @@ install_centos()
 	fi
 
 	yum -y install $packagesToInstall || exit -1
-	yum -y install epel-release || exit -1
+	yum -y install epel-release yum-plugin-copr || exit -1
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
 	yum -y copr enable tpokorra/openpetra_env epel-"$VER"-x86_64 || exit -1
 	# GConf2 was first only in epel9 testing
