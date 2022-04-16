@@ -310,9 +310,9 @@ install_centos()
 	yum -y install $packagesToInstall || exit -1
 	yum -y install epel-release || exit -1
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
-	yum -y copr enable tpokorra/openpetra_env || exit -1
-	# GConf2 is currently only in epel9 testing
-	yum-config-manager --enable epel-testing
+	yum -y copr enable tpokorra/openpetra_env epel-"$VER"-x86_64 || exit -1
+	# GConf2 was first only in epel9 testing
+	# yum-config-manager --enable epel-testing
 	# for printing reports to pdf
 	yum -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
