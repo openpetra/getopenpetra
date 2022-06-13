@@ -48,7 +48,7 @@
 #	$ curl https://get.openpetra.org | bash -s prod
 #
 # This should work on CentOS 7 and CentOS Stream 8 and 9, Fedora 35 and 36
-# and Ubuntu 20.04 (Focal Fossa), Ubuntu 18.04 (Bionic Beaver)
+# and Ubuntu 22.04 (Jammy Jellyfish), Ubuntu 20.04 (Focal Fossa)
 # and Debian 10 (Buster) & Debian 11 (Bullseye).
 # Please open an issue if you notice any bugs.
 
@@ -708,7 +708,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != 11 && "$VER" != "10" && "$VER" != "18.04" && "$VER" != "20.04" ]]; then
+			if [[ "$VER" != 11 && "$VER" != "10" && "$VER" != "20.04" && "$VER" != "22.04" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
