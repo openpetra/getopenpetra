@@ -71,7 +71,7 @@ export OPENPETRA_EMAILDOMAIN=myexample.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
-export NODE_VERSION=14
+export NODE_VERSION=16
 
 nginx_conf()
 {
