@@ -378,15 +378,7 @@ install_debian()
 	fi
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
-	if [[ "$VER" == "9" ]]; then
-		# we need version 0.12.5, not 0.12.3 which is part of stretch.
-		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb"
-		curl --silent --location $url > wkhtmltox_0.12.5-1.stretch_amd64.deb || exit -1
-		apt-get -y install ./wkhtmltox_0.12.5-1.stretch_amd64.deb || exit -1
-		rm -Rf wkhtmltox_0.12.5-1.stretch_amd64.deb
-	else
-		apt-get -y install wkhtmltopdf || exit -1
-	fi
+	apt-get -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
 		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb gconf2 libgdk-pixbuf2.0-0
@@ -401,12 +393,6 @@ install_debian()
 		apt-get -y install nodejs || exit -1
 
 		# for mono development
-		if [[ "$VER" == "9" ]]; then
-			# for nant
-			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/stretch stretch main' >> /etc/apt/sources.list
-			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			apt-get update || exit -1
-		fi
 		if [[ "$VER" == "10" ]]; then
 			# for nant
 			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
@@ -419,14 +405,6 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
-	fi
-	# For Debian Stretch, get Mono packages compiled by SolidCharity.com, because Debian Stretch only has Mono 4.6
-	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
-	if [[ "$VER" == "9" ]]; then
-		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
-		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-		echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/mono/debian/stretch stretch main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
-		apt-get update || exit -1
 	fi
 	# For Debian Buster, get Mono packages compiled by SolidCharity.com, because Debian Buster only has Mono 5.18
 	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
@@ -449,11 +427,7 @@ install_debian()
 	rm -Rf /usr/share/.mono
 	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	apt-get -y install nginx || exit -1
-	if [[ "$VER" == "9" ]]; then
-		apt-get -y install libsodium18 || exit -1
-	else
-		apt-get -y install libsodium23 || exit -1
-	fi
+	apt-get -y install libsodium23 || exit -1
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
 		apt-get -y install mariadb-server || exit -1
 		if [[ "$install_type" == "devenv" ]]; then
