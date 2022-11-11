@@ -533,10 +533,6 @@ install_ubuntu()
 			curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
 			# this will install npm as well
 			apt-get -y install nodejs || exit -1
-			if [[ "$VER" == "20.04" ]]; then
-				# for Ubuntu Focal, we need to explicitly install npm
-				apt-get -y install npm || exit -1
-			fi
 		fi
 		if [[ ! -z $APPVEYOR_MONO ]]; then
 			# Appveyor: there is some issue with mono-fastcgi-server4, and we don't need that on Appveyor
