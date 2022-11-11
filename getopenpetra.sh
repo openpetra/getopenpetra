@@ -408,19 +408,19 @@ install_debian()
 			# for nant
 			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/stretch stretch main' >> /etc/apt/sources.list
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			apt-get update
+			apt-get update || exit -1
 		fi
 		if [[ "$VER" == "10" ]]; then
 			# for nant
 			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			apt-get update
+			apt-get update || exit -1
 		fi
 		if [[ "$VER" == "11" ]]; then
 			# for nant
 			echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/nant/debian/bullseye bullseye main' >> /etc/apt/sources.list
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			apt-get update
+			apt-get update || exit -1
 		fi
 	fi
 	# For Debian Stretch, get Mono packages compiled by SolidCharity.com, because Debian Stretch only has Mono 4.6
@@ -429,7 +429,7 @@ install_debian()
 		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
 		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 		echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/mono/debian/stretch stretch main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
-		apt-get update
+		apt-get update || exit -1
 	fi
 	# For Debian Buster, get Mono packages compiled by SolidCharity.com, because Debian Buster only has Mono 5.18
 	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
@@ -437,7 +437,7 @@ install_debian()
 		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
 		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 		echo 'deb [arch=amd64] https://lbs.solidcharity.com/repos/tpokorra/mono/debian/buster buster main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
-		apt-get update
+		apt-get update || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
