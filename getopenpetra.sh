@@ -396,13 +396,13 @@ install_debian()
 		# for mono development
 		if [[ "$VER" == "10" ]]; then
 			# for nant
-			echo 'deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/buster buster main' >> /etc/apt/sources.list
+			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/buster buster main" >> /etc/apt/sources.list
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
 		if [[ "$VER" == "11" ]]; then
 			# for nant
-			echo 'deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/bullseye bullseye main' >> /etc/apt/sources.list
+			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/bullseye bullseye main" >> /etc/apt/sources.list
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
@@ -412,7 +412,7 @@ install_debian()
 	if [[ "$VER" == "10" ]]; then
 		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
 		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-		echo 'deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/debian/buster buster main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
+		echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/debian/buster buster main" | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
 		apt-get update || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
@@ -498,7 +498,7 @@ install_ubuntu()
 		# if we are not on appveyor with already mono >= 5 installed...
 		if [[ "$APPVEYOR_MONO" == "" ]]; then
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			echo 'deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/ubuntu/bionic bionic main' | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
+			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/ubuntu/bionic bionic main" | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
 			apt-get update
 		fi
 	fi
