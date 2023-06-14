@@ -589,11 +589,10 @@ install_openpetra()
 	if [[ "$IKNOWWHATIAMDOING" != "yes" ]]; then
 		echo "This script might destroy other applications on this container or VM or server."
 		echo "Please only run this script if you understand what it does."
-		echo "You can cancel by pressing ENTER"
-		echo "To continue with this script, type 'yes' followed by ENTER"
-		read IKNOWWHATIAMDOING
-	fi
-	if [[ "$IKNOWWHATIAMDOING" != "yes" ]]; then
+		echo "..."
+		echo "Please add the parameter --iknowwhatiamdoing=yes at the end, eg. like this:"
+		echo
+		echo "curl https://get.openpetra.org | bash -s devenv --iknowwhatiamdoing=yes"
 		echo
 		echo "This script was not executed."
 	        echo "To get the benefits of a secure and stable installation, you are welcome to get a free instance at https://www.openpetra.com"
