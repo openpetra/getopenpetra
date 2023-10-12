@@ -71,7 +71,7 @@ export OPENPETRA_EMAILDOMAIN=myexample.org
 export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
-export NODE_VERSION=16
+export NODE_MAJOR=18
 export LBS_DOWNLOAD_URL=https://download.solidcharity.com
 
 nginx_conf()
@@ -324,8 +324,9 @@ install_centos()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
-		curl --silent --location https://rpm.nodesource.com/setup_$NODE_VERSION.x  | bash -
-		yum -y install nodejs || exit -1
+		# see https://github.com/nodesource/distributions#redhat-versions
+		yum -y install https://rpm.nodesource.com/pub_$NODE_MAJOR.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm || exit -1
+		yum -y install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 || exit -1
 		# for mono development
 		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	else
@@ -388,8 +389,12 @@ install_debian()
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
 	if [[ "$install_type" == "devenv" ]]; then
 
-		curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
-
+		# see https://github.com/nodesource/distributions#debian-versions
+		mkdir -p /etc/apt/keyrings
+		apt-get -y install ca-certificates curl gnupg
+		curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+		echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+		apt-get update || exit -1
 		# for building the js client
 		apt-get -y install nodejs || exit -1
 
@@ -505,8 +510,13 @@ install_ubuntu()
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
-			curl --silent --location https://deb.nodesource.com/setup_$NODE_VERSION.x  | bash -
-			# this will install npm as well
+			# see https://github.com/nodesource/distributions#ubuntu-versions
+			mkdir -p /etc/apt/keyrings
+			apt-get -y install ca-certificates curl gnupg
+			curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+			echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+			apt-get update || exit -1
+			# for building the js client
 			apt-get -y install nodejs || exit -1
 		fi
 		if [[ ! -z $APPVEYOR_MONO ]]; then
