@@ -416,6 +416,12 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
+		if [[ "$VER" == "12" ]]; then
+			# for nant
+			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/bookworm bookworm main" >> /etc/apt/sources.list
+			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
+			apt-get update || exit -1
+		fi
 	fi
 	# For Debian Buster, get Mono packages compiled by SolidCharity.com, because Debian Buster only has Mono 5.18
 	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
@@ -691,14 +697,14 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9" && "$VER" != "37" && "$VER" != "38" ]]; then
+			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9" && "$VER" != "38" && "$VER" != "39" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != 11 && "$VER" != "10" && "$VER" != "20.04" && "$VER" != "22.04" ]]; then
+			if [[ "$VER" != 12 && "$VER" != "11" && "$VER" != "20.04" && "$VER" != "22.04" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
