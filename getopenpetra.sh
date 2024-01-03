@@ -331,7 +331,7 @@ install_centos()
 			# see https://github.com/nodesource/distributions/issues/1653
 			update-crypto-policies --set DEFAULT:SHA1 || exit -1
 		fi
-		yum -y install nodejs npm -y --setopt=nodesource-nodejs.module_hotfixes=1 || exit -1
+		yum -y install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 || exit -1
 		# for mono development
 		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	else
@@ -401,7 +401,7 @@ install_debian()
 		echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 		apt-get update || exit -1
 		# for building the js client
-		apt-get -y install nodejs npm || exit -1
+		apt-get -y install nodejs || exit -1
 
 		# for mono development
 		if [[ "$VER" == "10" ]]; then
