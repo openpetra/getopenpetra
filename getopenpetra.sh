@@ -325,13 +325,8 @@ install_centos()
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		# see https://github.com/nodesource/distributions#redhat-versions
-		yum -y install https://rpm.nodesource.com/pub_$NODE_MAJOR.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm || exit -1
-		if [[ "$VER" == "9" ]]; then
-			# avoid error on CentOS Stream 9: Signature not supported. Hash algorithm SHA1 not available.
-			# see https://github.com/nodesource/distributions/issues/1653
-			update-crypto-policies --set DEFAULT:SHA1 || exit -1
-		fi
-		yum -y install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 || exit -1
+		curl -fsSL https://rpm.nodesource.com/setup_$NODE_MAJOR.x | bash -
+		yum -y install nodejs || exit -1
 		# for mono development
 		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
 	else
