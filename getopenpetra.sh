@@ -131,10 +131,8 @@ openpetra_conf()
 			rm -f $OPENPETRA_HOME/server/bin/libsodium.dll
 			rm -f $OPENPETRA_HOME/server/bin/libsodium-64.dll
 
-			if [ -f /usr/lib64/libsodium.so.18 ]; then
-				ln -s /usr/lib64/libsodium.so.18 $OPENPETRA_HOME/server/bin/libsodium.so
-			elif [ -f /usr/lib/x86_64-linux-gnu/libsodium.so.18 ]; then
-				ln -s /usr/lib/x86_64-linux-gnu/libsodium.so.18 $OPENPETRA_HOME/server/bin/libsodium.so
+			if [ -f /usr/lib64/libsodium.so.26 ]; then
+				ln -s /usr/lib64/libsodium.so.26 $OPENPETRA_HOME/server/bin/libsodium.so
 			elif [ -f /usr/lib64/libsodium.so.23 ]; then
 				ln -s /usr/lib64/libsodium.so.23 $OPENPETRA_HOME/server/bin/libsodium.so
 			elif [ -f /usr/lib/x86_64-linux-gnu/libsodium.so.23 ]; then
