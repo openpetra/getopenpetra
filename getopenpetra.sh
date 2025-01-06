@@ -177,6 +177,8 @@ FINISH
 		rm -Rf /tmp/bootstrap
 	fi
 
+	loginctl enable-linger $OPENPETRA_USER
+	chown -R $OPENPETRA_USER:openpetra $OPENPETRA_HOME
 	sudo -u $OPENPETRA_USER -s bash -c "source ~/.profile && systemctl --user enable openpetra --now"
 }
 
@@ -806,7 +808,7 @@ install_openpetra()
 		curl --silent --location https://github.com/openpetra/demo-databases/raw/master/demoWith1ledger.yml.gz > $demodbfile
 		OP_CUSTOMER=$OPENPETRA_USER $OPENPETRA_SERVER_BIN loadYmlGz $demodbfile || exit -1
 
-		systemctl restart openpetra
+		sudo -u $OPENPETRA_USER -s bash -c "source ~/.profile && systemctl --user restart openpetra"
 		systemctl restart nginx
 
 		# display information to the developer
@@ -857,7 +859,7 @@ install_openpetra()
 		userName=$OPENPETRA_USER $OPENPETRA_SERVER_BIN init || exit -1
 		$OPENPETRA_SERVER_BIN initdb || exit -1
 
-		systemctl restart openpetra
+		sudo -u $OPENPETRA_USER -s bash -c "source ~/.profile && systemctl --user restart openpetra"
 		systemctl restart nginx
 
 		# setup backup of all openpetra databases each night
