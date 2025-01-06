@@ -47,9 +47,9 @@
 #
 #	$ curl https://get.openpetra.org | bash -s prod
 #
-# This should work on CentOS 7 and CentOS Stream 8 and 9, Fedora 37 and 38
-# and Ubuntu 22.04 (Jammy Jellyfish), Ubuntu 20.04 (Focal Fossa)
-# and Debian 10 (Buster) & Debian 11 (Bullseye).
+# This should work on CentOS Stream 9, Fedora 41
+# and Ubuntu 24.04 (Noble Numbat)
+# and Debian 12 (Bookworm).
 # Please open an issue if you notice any bugs.
 
 [[ $- = *i* ]] && echo "Don't source this script!" && return 10
@@ -68,7 +68,6 @@ export SRC_PATH=$OPENPETRA_HOME/openpetra
 export OPENPETRA_SERVERNAME=localhost
 export OPENPETRA_URL=http://localhost
 export OPENPETRA_EMAILDOMAIN=myexample.org
-export OPENPETRA_SERVER_BIN=/usr/bin/openpetra
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
 export NODE_MAJOR=20
@@ -145,15 +144,23 @@ openpetra_conf()
 	fi
 
 	# install OpenPetra service file
-	systemdpath="/usr/lib/systemd/system"
-	if [ ! -d $systemdpath ]; then
-		# Ubuntu Bionic, and Debian Stretch
-		systemdpath="/lib/systemd/system"
-	fi
-	cat $OPENPETRA_SERVICE_FILE \
-		| sed -e "s/OPENPETRA_USER/$OPENPETRA_USER/g" \
-		| sed -e "s#OPENPETRA_SERVER_BIN#$OPENPETRA_SERVER_BIN#g" \
-		> $systemdpath/openpetra.service
+	echo "export XDG_RUNTIME_DIR=/run/user/\$UID" >> $OPENPETRA_HOME/.profile
+	systemdpath=$OPENPETRA_HOME/.config/systemd/user
+	mkdir -p $systemdpath
+
+	cat > $systemdpath/openpetra.service <<FINISH
+[Unit]
+Description=OpenPetra Server
+After=network-online.target
+
+[Service]
+ExecStart=%h/openpetra-server.sh start
+ExecStop=%h/openpetra-server.sh stop
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+FINISH
 
 	mkdir -p $OPENPETRA_HOME/etc
 	cp $TEMPLATES_PATH/common.config $OPENPETRA_HOME/etc/common.config
@@ -170,8 +177,7 @@ openpetra_conf()
 		rm -Rf /tmp/bootstrap
 	fi
 
-	systemctl enable openpetra
-	systemctl start openpetra
+	sudo -u $OPENPETRA_USER -s bash -c "source ~/.profile && systemctl --user enable openpetra --now"
 }
 
 openpetra_conf_devenv()
@@ -690,14 +696,14 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "7" && "$VER" != "8" && "$VER" != "9" && "$VER" != "39" && "$VER" != "40" ]]; then
+			if [[ "$VER" != "9" && "$VER" != "41" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != 12 && "$VER" != "11" && "$VER" != "20.04" && "$VER" != "22.04" ]]; then
+			if [[ "$VER" != 12 && "$VER" != "24.04" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
@@ -746,7 +752,6 @@ install_openpetra()
 		export OPENPETRA_HOME=/home/$OPENPETRA_USER
 		export SRC_PATH=$OPENPETRA_HOME/openpetra
 		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
-		export OPENPETRA_SERVICE_FILE=$SRC_PATH/setup/linuxserver/$OPENPETRA_RDBMSType/openpetra.service
 		export NGINX_TEMPLATE_FILE=$SRC_PATH/setup/linuxserver/nginx.conf
 		export TEMPLATES_PATH=$SRC_PATH/setup/linuxserver
 
@@ -831,7 +836,6 @@ install_openpetra()
 		export SRC_PATH=/home/$OPENPETRA_USER
 		export OPENPETRA_SERVER_BIN=$OPENPETRA_HOME/openpetra-server.sh
 		export TEMPLATES_PATH=$SRC_PATH/templates
-		export OPENPETRA_SERVICE_FILE=$TEMPLATES_PATH/openpetra.service
 		export NGINX_TEMPLATE_FILE=$TEMPLATES_PATH/nginx.conf
 
 		# get the binary tarball
