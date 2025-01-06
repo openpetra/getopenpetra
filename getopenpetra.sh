@@ -177,7 +177,7 @@ FINISH
 		rm -Rf /tmp/bootstrap
 	fi
 
-	loginctl enable-linger $OPENPETRA_USER
+	loginctl enable-linger $OPENPETRA_USER && sleep 5
 	chown -R $OPENPETRA_USER:openpetra $OPENPETRA_HOME
 	sudo -u $OPENPETRA_USER -s bash -c "source ~/.profile && systemctl --user enable openpetra --now"
 }
