@@ -549,7 +549,7 @@ install_ubuntu()
 		rm -Rf /usr/share/.mono/
 		curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
 	fi
-	apt-get -y install libsodium23 lsb || exit -1
+	apt-get -y install libsodium23 lsb-release || exit -1
 	apt-get -y install nginx || exit -1
 
 	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
