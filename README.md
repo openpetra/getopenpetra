@@ -49,8 +49,6 @@ Then you can request a commercially-licensed download:
 
 	$ curl https://get.openpetra.org | bash -s prod
 
-This should work on CentOS 7 and 8 and 9, Fedora 34 and 35
-and Ubuntu 20.04 (Focal Fossa), Ubuntu 18.04 (Bionic Beaver)
-and Debian 10 (Buster) & Debian 11 (Bullseye).
+This should work on CentOS Stream 9, Fedora 41, Ubuntu 24.04 (Noble Numbat), and Debian 12 (Bookworm).
 
 Please open an issue if you notice any bugs.
