@@ -270,7 +270,7 @@ install_fedora()
 	dnf -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		dnf -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss libXScrnSaver alsa-lib || exit -1
+		dnf -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel nss libXScrnSaver alsa-lib || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
@@ -318,13 +318,11 @@ install_centos()
 	yum -y install epel-release yum-plugin-copr || exit -1
 	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
 	yum -y copr enable tpokorra/openpetra_env epel-"$VER"-x86_64 || exit -1
-	# GConf2 was first only in epel9 testing
-	# yum-config-manager --enable epel-testing
 	# for printing reports to pdf
 	yum -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		yum -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss libXScrnSaver alsa-lib || exit -1
+		yum -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel nss libXScrnSaver alsa-lib || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
@@ -389,7 +387,7 @@ install_debian()
 	apt-get -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb gconf2 libgdk-pixbuf2.0-0
+		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libnss3 libxss1 libasound2 libxtst6 xauth xvfb libgdk-pixbuf2.0-0
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
@@ -505,7 +503,7 @@ install_ubuntu()
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for cypress tests
-		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libgconf-2-4 libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb libgdk-pixbuf2.0-0 libqt5gui5 libegl1 libegl-mesa0 || exit -1
+		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb libgdk-pixbuf2.0-0 libqt5gui5 libegl1 libegl-mesa0 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
