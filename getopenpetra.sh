@@ -502,8 +502,13 @@ install_ubuntu()
 		apt-get -y install wkhtmltopdf || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
+		if [[ "$VER" == "22.04" ]]; then
+			libasound="libasound2"
+		else
+			libasound="libasound2t64"
+		fi
 		# for cypress tests
-		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb libgdk-pixbuf2.0-0 libqt5gui5 libegl1 libegl-mesa0 || exit -1
+		apt-get -y install libgtk2.0-0 libgtk-3-0 libnotify-dev libgbm-dev libnss3 libxss1 $libasound libxtst6 xauth xvfb libgdk-pixbuf2.0-0 libqt5gui5 libegl1 libegl-mesa0 || exit -1
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
