@@ -47,7 +47,7 @@
 #
 #	$ curl https://get.openpetra.org | bash -s prod
 #
-# This should work on CentOS Stream 9, Fedora 41
+# This should work on CentOS Stream 9, Fedora 42
 # and Ubuntu 24.04 (Noble Numbat)
 # and Debian 12 (Bookworm).
 # Please open an issue if you notice any bugs.
@@ -701,7 +701,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "9" && "$VER" != "41" ]]; then
+			if [[ "$VER" != "9" && "$VER" != "42" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
