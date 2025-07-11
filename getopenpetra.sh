@@ -403,12 +403,6 @@ install_debian()
 		apt-get -y install nodejs || exit -1
 
 		# for mono development
-		if [[ "$VER" == "10" ]]; then
-			# for nant
-			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/buster buster main" >> /etc/apt/sources.list
-			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			apt-get update || exit -1
-		fi
 		if [[ "$VER" == "11" ]]; then
 			# for nant
 			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/debian/bullseye bullseye main" >> /etc/apt/sources.list
@@ -421,14 +415,6 @@ install_debian()
 			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
-	fi
-	# For Debian Buster, get Mono packages compiled by SolidCharity.com, because Debian Buster only has Mono 5.18
-	# the packages from Xamarin/Microsoft will be recompiled, that takes too much time during CI
-	if [[ "$VER" == "10" ]]; then
-		apt-get -y install apt-transport-https dirmngr gnupg ca-certificates
-		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-		echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/debian/buster buster main" | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
-		apt-get update || exit -1
 	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		apt-get -y install nant mono-devel mono-xsp4 mono-fastcgi-server4 ca-certificates-mono xfonts-75dpi fonts-liberation libgdiplus || exit -1
@@ -492,15 +478,7 @@ install_ubuntu()
 
 	apt-get -y install $packagesToInstall || exit -1
 	# for printing reports to pdf
-	if [[ "$VER" == "18.04" ]]; then
-		# we need version 0.12.5, not 0.12.4 which is part of bionic.
-		url="https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb"
-		curl --silent --location $url > wkhtmltox_0.12.5-1.bionic_amd64.deb || exit -1
-		apt-get -y install ./wkhtmltox_0.12.5-1.bionic_amd64.deb || exit -1
-		rm -Rf wkhtmltox_0.12.5-1.bionic_amd64.deb
-	else
-		apt-get -y install wkhtmltopdf || exit -1
-	fi
+	apt-get -y install wkhtmltopdf || exit -1
 	if [[ "$install_type" == "devenv" ]]; then
 		if [[ "$VER" == "22.04" ]]; then
 			libasound="libasound2"
@@ -512,16 +490,6 @@ install_ubuntu()
 	fi
 	# for printing bar codes
 	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/truetype/code128.ttf
-	# Ubuntu Bionic has Mono 4.6, therefore we use our own compiled Mono.
-	# Mono compiled by Xamarin takes too much time to install during CI...
-	if [[ "$VER" == "18.04" ]]; then
-		# if we are not on appveyor with already mono >= 5 installed...
-		if [[ "$APPVEYOR_MONO" == "" ]]; then
-			apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x4796B710919684AC
-			echo "deb [arch=amd64] $LBS_DOWNLOAD_URL/repos/tpokorra/mono/ubuntu/bionic bionic main" | sudo tee /etc/apt/sources.list.d/mono-tpokorra.list
-			apt-get update
-		fi
-	fi
 	if [[ "$install_type" == "devenv" ]]; then
 		# for building the js client
 		if [[ "$APPVEYOR_NODE" == "" ]]; then
@@ -533,6 +501,13 @@ install_ubuntu()
 			apt-get update || exit -1
 			# for building the js client
 			apt-get -y install nodejs || exit -1
+		fi
+		# for mono development
+		if [[ "$VER" == "24.04" ]]; then
+			# for nant
+			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tpokorra-nant-keyring.gpg] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/ubuntu/noble noble main" >> /etc/apt/sources.list
+			gpg --no-default-keyring --keyring /usr/share/keyrings/tpokorra-nant-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x4796B710919684AC
+			apt-get update || exit -1
 		fi
 		if [[ ! -z $APPVEYOR_MONO ]]; then
 			# Appveyor: there is some issue with mono-fastcgi-server4, and we don't need that on Appveyor
