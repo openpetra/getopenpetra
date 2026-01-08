@@ -70,7 +70,7 @@ export OPENPETRA_URL=http://localhost
 export OPENPETRA_EMAILDOMAIN=myexample.org
 export GIT_URL=https://github.com/openpetra/openpetra.git
 export OPENPETRA_BRANCH=test
-export NODE_MAJOR=20
+export NODE_MAJOR=24
 export LBS_DOWNLOAD_URL=https://download.solidcharity.com
 
 nginx_conf()
