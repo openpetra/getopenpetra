@@ -506,6 +506,8 @@ install_ubuntu()
 		if [[ "$VER" == "24.04" ]]; then
 			# for nant
 			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/tpokorra-nant-keyring.gpg] $LBS_DOWNLOAD_URL/repos/tpokorra/nant/ubuntu/noble noble main" >> /etc/apt/sources.list
+			mkdir /root/.gnupg
+			chmod 700 /root/.gnupg
 			gpg --no-default-keyring --keyring /usr/share/keyrings/tpokorra-nant-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x4796B710919684AC
 			apt-get update || exit -1
 		fi
