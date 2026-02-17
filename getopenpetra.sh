@@ -47,7 +47,7 @@
 #
 #	$ curl https://get.openpetra.org | bash -s prod
 #
-# This should work on CentOS Stream 10, Fedora 43
+# This should work on Fedora 43
 # and Ubuntu 24.04 (Noble Numbat)
 # and Debian 12 (Bookworm).
 # Please open an issue if you notice any bugs.
@@ -305,72 +305,6 @@ install_fedora()
 	fi
 }
 
-install_centos()
-{
-	packagesToInstall="yum-utils sudo curl wget"
-	if [[ "$install_type" == "devenv" ]]; then
-		# need unzip for devenv, nant buildRelease for bootstrap-4.0.0-dist.zip
-		# need git for devenv
-		packagesToInstall=$packagesToInstall" git unzip"
-	fi
-
-	yum -y install $packagesToInstall || exit -1
-	yum -y install epel-release yum-plugin-copr || exit -1
-	# provide nant, nunit2, log4net and wkhtmltopdf for epel/centos
-	yum -y copr enable tpokorra/openpetra_env epel-"$VER"-x86_64 || exit -1
-	# for printing reports to pdf
-	yum -y install wkhtmltopdf || exit -1
-	if [[ "$install_type" == "devenv" ]]; then
-		# for cypress tests
-		yum -y install xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel nss libXScrnSaver alsa-lib || exit -1
-	fi
-	# for printing bar codes
-	curl --silent --location https://github.com/Holger-Will/code-128-font/raw/master/fonts/code128.ttf > /usr/share/fonts/code128.ttf
-	if [[ "$install_type" == "devenv" ]]; then
-		# for building the js client
-		# see https://github.com/nodesource/distributions#redhat-versions
-		curl -fsSL https://rpm.nodesource.com/setup_$NODE_MAJOR.x | bash -
-		yum -y install nodejs || exit -1
-		# for mono development
-		yum -y install nant mono-devel mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
-	else
-		# for mono runtime
-		yum -y install mono-mvc mono-wcf mono-data mono-winfx xsp liberation-mono-fonts libgdiplus-devel || exit -1
-	fi
-	# update the certificates for Mono
-	rm -Rf /usr/share/.mono
-	curl -L https://curl.se/ca/cacert.pem > ~/cacert.pem && cert-sync ~/cacert.pem
-	yum -y install nginx libsodium || exit -1
-	if [[ "$OPENPETRA_RDBMSType" == "mysql" ]]; then
-		yum -y install mariadb-server || exit -1
-		if [[ "$install_type" == "devenv" ]]; then
-			# phpmyadmin
-			if [[ "`rpm -qa | grep remi-release-$VER`" = "" ]]; then
-				yum -y install http://rpms.remirepo.net/enterprise/remi-release-$VER.rpm || exit -1
-			fi
-			yum-config-manager --enable remi
-			yum-config-manager --enable remi-php74 || dnf -y module enable php:remi-7.4
-			sleep 10 # avoid OSError: [Errno 1] Operation not permitted: '/var/cache/yum/x86_64/7/remi-php74/gen/primary_db.sqlite'
-			yum -y install phpMyAdmin php-fpm || exit -1
-			sed -i "s#user = apache#user = nginx#" /etc/php-fpm.d/www.conf
-			sed -i "s#group = apache#group = nginx#" /etc/php-fpm.d/www.conf
-			sed -i "s#listen = 127.0.0.1:9000#listen = 127.0.0.1:8080#" /etc/php-fpm.d/www.conf
-			sed -i "s#;chdir = /var/www#chdir = /usr/share/phpMyAdmin#" /etc/php-fpm.d/www.conf
-			chown nginx:nginx /var/lib/php/session
-			systemctl enable php-fpm
-			systemctl start php-fpm
-		fi
-	elif [[ "$OPENPETRA_RDBMSType" == "postgresql" ]]; then
-		yum -y install postgresql-server || exit -1
-	fi
-
-	# CentOS 9: For Mono 6.12, loading the libsodium.so file does not work as expected.
-	if [ -f /usr/lib64/libsodium.so.23 ]
-	then
-		sed -i 's#</configuration>#        <dllmap dll="libsodium" target="/usr/lib64/libsodium.so.23" os="!windows"/>\n</configuration>#g' /etc/mono/config
-	fi
-}
-
 install_debian()
 {
 	packagesToInstall="sudo curl wget"
@@ -611,7 +545,7 @@ install_openpetra()
 		echo "You must specify the install type:"
 		echo "  devenv: install a development environment for OpenPetra"
 		echo "  test: install an environment to test OpenPetra"
-		echo "  demo: install a demo server with OpenPetra (only supported on CentOS)"
+		echo "  demo: install a demo server with OpenPetra"
 		echo "  prod: install a production server with OpenPetra"
 		return 9
 	fi
@@ -661,15 +595,11 @@ install_openpetra()
 		OS=$NAME
 		VER=$VERSION_ID
 
-		if [[ "$OS" == "CentOS Linux" ]]; then OS="CentOS"; OS_FAMILY="Fedora"; fi
-		if [[ "$OS" == "CentOS Stream" ]]; then OS="CentOS"; OS_FAMILY="Fedora"; fi
-		if [[ "$OS" == "Red Hat Enterprise Linux Server" ]]; then OS="CentOS"; OS_FAMILY="Fedora"; fi
 		if [[ "$OS" == "Fedora" || "$OS" == "Fedora Linux" ]]; then OS="Fedora"; OS_FAMILY="Fedora"; fi
 		if [[ "$OS" == "Debian GNU/Linux" ]]; then OS="Debian"; OS_FAMILY="Debian"; fi
 		if [[ "$OS" == "Ubuntu" ]]; then OS="Ubuntu"; OS_FAMILY="Debian"; fi
 
-		if [[ "$OS" != "CentOS"
-			&& "$OS" != "Fedora"
+		if [[ "$OS" != "Fedora"
 			&& "$OS" != "Debian"
 			&& "$OS" != "Ubuntu"
 			]]; then
@@ -678,7 +608,7 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Fedora" ]]; then
-			if [[ "$VER" != "10" && "$VER" != "43" ]]; then
+			if [[ "$VER" != "43" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
@@ -697,8 +627,6 @@ install_openpetra()
 
 	if [[ "$OS" == "Fedora" ]]; then
 		install_fedora
-	elif [[ "$OS" == "CentOS" ]]; then
-		install_centos
 	elif [[ "$OS" == "Debian" ]]; then
 		install_debian
 	elif [[ "$OS" == "Ubuntu" ]]; then
@@ -772,10 +700,6 @@ install_openpetra()
 		if [[ -z $APPVEYOR_MONO ]]; then
 			su $OPENPETRA_USER -c "nant install.js" || exit -1
 		fi
-
-		# for fixing issues on CentOS, pushing to upstream branches
-		git config --global push.default simple
-		su $OPENPETRA_USER -c "git config --global push.default simple"
 
 		# for the cypress test environment
 		# TODO: latest version of cypress (5.x) already installed with nant install.js
