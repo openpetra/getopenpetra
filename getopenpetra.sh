@@ -615,7 +615,8 @@ install_openpetra()
 		fi
 
 		if [[ "$OS_FAMILY" == "Debian" ]]; then
-			if [[ "$VER" != 12 && "$VER" != "24.04" ]]; then
+			# we still support Ubuntu 22.04 for Appveyor. see https://www.appveyor.com/docs/linux-images-software/
+			if [[ "$VER" != 12 && "$VER" != "24.04" && "$VER" != "22.04" ]]; then
 				echo "Aborted, Your distro version is not supported: " $OS $VER
 				return 6
 			fi
